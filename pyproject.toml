@@ -4,12 +4,33 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metagen"
-version = "0.2.0"
-description = "MetaGen: a universal spec-to-model synthesizer"
+version = "1.0.0"
+description = "MetaGen: a universal spec-to-model synthesizer that generates complete AI model release artifacts from YAML specifications"
 readme = "README.md"
-authors = [{ name = "MetaGen Research", email = "research@metagen.local" }]
+authors = [{ name = "MetaGen Contributors" }]
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
+keywords = ["machine-learning", "deep-learning", "automl", "code-generation", "architecture-search"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Code Generators",
+]
+
+[project.urls]
+Homepage = "https://github.com/xmavgithub/metagen"
+Documentation = "https://github.com/xmavgithub/metagen#readme"
+Repository = "https://github.com/xmavgithub/metagen.git"
+Issues = "https://github.com/xmavgithub/metagen/issues"
+Changelog = "https://github.com/xmavgithub/metagen/blob/main/CHANGELOG.md"
+
 dependencies = [
   "typer>=0.12.3",
   "pydantic>=2.6.0",

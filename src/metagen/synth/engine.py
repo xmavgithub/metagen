@@ -16,7 +16,7 @@ console = Console()
 
 
 def _default_run_id() -> str:
-    now = _dt.datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    now = _dt.datetime.now(_dt.UTC).strftime("%Y%m%d-%H%M%S")
     return f"run-{now}"
 
 
