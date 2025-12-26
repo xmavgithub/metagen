@@ -1,0 +1,20 @@
+# Diffusion decoder fragment.
+import torch
+import torch.nn as nn
+
+
+class DiffusionDecoder(nn.Module):
+    def __init__(
+        self,
+        in_chans: int = {{ blueprint.dims.hidden_size // 8 }},
+        out_chans: int = {{ blueprint.num_channels or 3 }},
+    ) -> None:
+        super().__init__()
+        self.up = nn.Sequential(
+            nn.Conv2d(in_chans, in_chans // 2, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_chans // 2, out_chans, kernel_size=3, padding=1),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.up(x)

@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "infinite_context"
+description: "Long-context language model targeting effectively infinite context."
+modality:
+  inputs: ["text"]
+  outputs: ["text"]
+task:
+  type: "generation"
+  domain: "text"
+constraints:
+  latency: "near-real-time"
+  device: "datacenter_gpu"
+  parameter_budget:
+    max: "12B"
+  memory_budget: "80GB"
+  context_window: "∞"
+  throughput: "40 tok/s"
+training:
+  objective: ["autoregressive"]
+  data:
+    sources: ["scraped", "licensed"]
+    size: "5T tokens"
+    governance:
+      pii: "filtered"
+      copyright: "mostly"
+  compute:
+    hardware: "128xH100"
+    duration: "30 days"
+  alignment:
+    method: ["rlhf", "rlaif"]
+    policy: "helpful-harmless-ish"
+architecture:
+  family: "transformer"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

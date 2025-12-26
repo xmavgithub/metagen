@@ -1,0 +1,32 @@
+# Task 1: Text Classification
+# A small transformer for sentiment/topic classification
+# Tests: basic text modality, encoder-only architecture
+
+name: "text-classifier-tiny"
+description: "Tiny encoder-only transformer for text classification experiments"
+
+modality:
+  inputs: ["text"]
+  outputs: ["text"]
+
+architecture:
+  family: "transformer"
+  variant: "encoder-only"
+  attention: "full"
+  context_length: 512
+
+constraints:
+  parameters: "50M"
+  latency: "10ms"
+  device: "gpu"
+
+training:
+  objective: ["cross_entropy"]
+  optimizer: "adamw"
+  scheduler: "cosine"
+  batch_size: 32
+  epochs: 10
+
+evaluation:
+  benchmarks: ["accuracy", "f1_score"]
+  datasets: ["synthetic_classification"]

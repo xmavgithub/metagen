@@ -1,0 +1,28 @@
+# Image dataset fragment (basic ImageFolder style).
+from pathlib import Path
+
+import torch
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
+
+
+def build_image_transforms(image_size: int = {{ blueprint.image_size or 224 }}):
+    return transforms.Compose(
+        [
+            transforms.Resize((image_size, image_size)),
+            transforms.ToTensor(),
+        ]
+    )
+
+
+def build_image_dataloader(
+    data_dir: str | Path,
+    batch_size: int = 32,
+    shuffle: bool = True,
+) -> DataLoader:
+    dataset = ImageFolder(
+        root=str(data_dir),
+        transform=build_image_transforms(),
+    )
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

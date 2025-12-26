@@ -1,0 +1,40 @@
+metagen_version: "1.0"
+name: "audio_musicgen"
+description: "Audio generation model for short music clips."
+modality:
+  inputs: ["audio"]
+  outputs: ["audio"]
+task:
+  type: "generation"
+  domain: "music"
+constraints:
+  latency: "near-real-time"
+  device: "consumer_gpu"
+  parameter_budget:
+    max: "1B"
+  memory_budget: "16GB"
+  context_window: "32k"
+training:
+  objective: ["autoregressive"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "20M clips"
+    governance:
+      pii: "filtered"
+      copyright: "licensed"
+  compute:
+    hardware: "8xA100"
+    duration: "3 days"
+architecture:
+  family: "transformer"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "video_realtime_avatar"
+description: "Real-time talking avatar with synchronized audio and video."
+modality:
+  inputs: ["text", "image", "audio"]
+  outputs: ["video", "audio"]
+task:
+  type: "generation"
+  domain: "video"
+constraints:
+  latency: "real-time"
+  device: "consumer_gpu"
+  parameter_budget:
+    max: "20B"
+  memory_budget: "12GB"
+  context_window: "1M"
+  throughput: "30fps"
+training:
+  objective: ["diffusion", "autoregressive"]
+  data:
+    sources: ["licensed", "synthetic", "scraped"]
+    size: "unknown but large"
+    governance:
+      pii: "we tried"
+      copyright: "mostly"
+  compute:
+    hardware: "8xH100"
+    duration: "3 days"
+  alignment:
+    method: ["rlhf", "rlaif", "constitutional"]
+    policy: "helpful-harmless-ish"
+architecture:
+  family: "hybrid"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

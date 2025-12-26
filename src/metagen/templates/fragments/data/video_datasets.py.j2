@@ -1,0 +1,23 @@
+# Video dataset fragment.
+import torch
+from torch.utils.data import Dataset
+
+
+class SyntheticVideoDataset(Dataset):
+    def __init__(
+        self,
+        size: int = 200,
+        frames: int = {{ blueprint.max_seq_len or 16 }},
+        channels: int = {{ blueprint.num_channels or 3 }},
+        image_size: int = {{ blueprint.image_size or 224 }},
+    ) -> None:
+        self.size = size
+        self.frames = frames
+        self.channels = channels
+        self.image_size = image_size
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int) -> torch.Tensor:
+        return torch.randn(self.channels, self.frames, self.image_size, self.image_size)

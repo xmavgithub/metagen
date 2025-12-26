@@ -1,0 +1,36 @@
+metagen_version: "1.0"
+name: "text_llm_tiny"
+description: "Tiny LLM for local testing (~10M params)"
+modality:
+  inputs: ["text"]
+  outputs: ["text"]
+task:
+  type: "generation"
+  domain: "text"
+constraints:
+  latency: "near-real-time"
+  device: "consumer_gpu"
+  parameter_budget:
+    max: "10M"
+  memory_budget: "1GB"
+  context_window: "512"
+  throughput: "500 tok/s"
+training:
+  objective: ["autoregressive"]
+  data:
+    sources: ["synthetic"]
+    size: "100M tokens"
+    governance:
+      pii: "none"
+      copyright: "none"
+  compute:
+    hardware: "1xMPS"
+    duration: "1 hour"
+  alignment:
+    method: []
+    policy: "none"
+architecture:
+  family: "transformer"
+  components:
+    - name: "TinyEncoder"
+      type: "transformer_encoder"

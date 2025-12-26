@@ -1,0 +1,90 @@
+MetaGen Modality Support
+========================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Modality Handlers                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌───────────────┐
+                              │     Spec      │
+                              │   modality:   │
+                              │    inputs     │
+                              │    outputs    │
+                              └───────┬───────┘
+                                      │
+                                      ▼
+                         ┌────────────────────────┐
+                         │    Handler Registry    │
+                         │    get_handler(spec)   │
+                         └───────────┬────────────┘
+                                     │
+        ┌────────────────┬───────────┼───────────┬────────────────┐
+        │                │           │           │                │
+        ▼                ▼           ▼           ▼                ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│     Text     │ │    Image     │ │    Audio     │ │    Video     │ │  Multimodal  │
+│   Handler    │ │   Handler    │ │   Handler    │ │   Handler    │ │   Handler    │
+├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤
+│ Architectures│ │ Architectures│ │ Architectures│ │ Architectures│ │ Architectures│
+│ • transformer│ │ • transformer│ │ • transformer│ │ • transformer│ │ • transformer│
+│              │ │ • cnn        │ │              │ │ • diffusion  │ │ • hybrid     │
+│              │ │ • diffusion  │ │              │ │              │ │              │
+│              │ │ • hybrid     │ │              │ │              │ │              │
+├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤
+│ Components   │ │ Components   │ │ Components   │ │ Components   │ │ Components   │
+│ • Embeddings │ │ • Patch emb  │ │ • Spectrogram│ │ • 3D conv    │ │ • Text enc   │
+│ • Attention  │ │ • ViT layers │ │ • Temporal   │ │ • Temporal   │ │ • Image enc  │
+│ • FFN        │ │ • U-Net      │ │   attention  │ │   attention  │ │ • Cross attn │
+│ • LM head    │ │ • Diffusion  │ │ • WaveNet    │ │ • Frame dec  │ │ • Projection │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+
+
+Example Specs by Modality
+=========================
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  TEXT                                                                        │
+│  ────                                                                        │
+│  text_llm_8b.yaml      │ 8B parameter LLM, transformer                       │
+│  text_llm_tiny.yaml    │ 50M tiny model for testing                          │
+│  edge_tiny_agent.yaml  │ Edge deployment, real-time                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  IMAGE                                                                       │
+│  ─────                                                                       │
+│  image_vit_base.yaml         │ Vision Transformer, 86M params                │
+│  image_diffusion_sdxl.yaml   │ SDXL-style diffusion, 6B params               │
+│  image_diffusion_small.yaml  │ Small diffusion for testing                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  AUDIO                                                                       │
+│  ─────                                                                       │
+│  audio_musicgen.yaml      │ Music generation, 1B params                      │
+│  audio_musicgen_like.yaml │ Extended audio config                            │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  VIDEO                                                                       │
+│  ─────                                                                       │
+│  video_generation.yaml      │ Text-to-video, diffusion                       │
+│  video_realtime_avatar.yaml │ Real-time avatar generation                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  MULTIMODAL                                                                  │
+│  ──────────                                                                  │
+│  multimodal_clip.yaml │ CLIP-style contrastive, 800M params                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  3D                                                                          │
+│  ──                                                                          │
+│  3d_text_to_mesh.yaml │ Text-to-3D mesh generation                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+
+Modality → Objective Mapping
+============================
+
+┌───────────────────┬────────────────────────────────────────────────────────┐
+│     Modality      │              Recommended Objectives                    │
+├───────────────────┼────────────────────────────────────────────────────────┤
+│ text → text       │ autoregressive, masked                                 │
+│ image → image     │ diffusion (generation), classification (ViT)          │
+│ text → image      │ diffusion                                              │
+│ audio → audio     │ autoregressive                                         │
+│ text → video      │ diffusion                                              │
+│ text+image → both │ contrastive                                            │
+└───────────────────┴────────────────────────────────────────────────────────┘

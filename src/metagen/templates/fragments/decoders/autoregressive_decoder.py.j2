@@ -1,0 +1,16 @@
+# Autoregressive decoder fragment.
+import torch
+import torch.nn as nn
+
+
+class AutoregressiveDecoder(nn.Module):
+    def __init__(
+        self,
+        hidden_size: int = {{ blueprint.dims.hidden_size }},
+        vocab_size: int = {{ blueprint.vocab_size or 50257 }},
+    ) -> None:
+        super().__init__()
+        self.proj = nn.Linear(hidden_size, vocab_size)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.proj(x)

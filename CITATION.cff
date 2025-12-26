@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "MetaGen: A Universal Spec-to-Model Synthesizer"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: "MetaGen Contributors"
+repository-code: "https://github.com/xmavgithub/metagen"
+url: "https://github.com/xmavgithub/metagen"
+license: MIT
+version: "1.0.0"
+date-released: "2025-12-26"
+keywords:
+  - machine-learning
+  - deep-learning
+  - automl
+  - architecture-search
+  - code-generation
+  - paper-generation
+abstract: >-
+  MetaGen is a universal spec-to-model synthesizer that transforms
+  high-level YAML specifications into complete AI model release packages
+  including architecture blueprints, PyTorch code, training recipes,
+  benchmark reports, and publication-ready LaTeX papers.

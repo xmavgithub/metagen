@@ -1,0 +1,8 @@
+site_name: MetaGen
+theme: readthedocs
+nav:
+  - Spec Language: docs/spec_language.md
+  - Architecture: docs/architecture.md
+  - Benchmarks: docs/benchmarks.md
+  - Paper: docs/paper.md
+  - FAQ: docs/faq.md

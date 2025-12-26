@@ -1,0 +1,17 @@
+# Pixel embedding fragment.
+import torch
+import torch.nn as nn
+
+
+class PixelEmbedding(nn.Module):
+    def __init__(
+        self,
+        in_channels: int = {{ blueprint.num_channels or 3 }},
+        hidden_size: int = {{ blueprint.dims.hidden_size }},
+    ) -> None:
+        super().__init__()
+        self.proj = nn.Conv2d(in_channels, hidden_size, kernel_size=1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (batch, channels, height, width)
+        return self.proj(x)

@@ -1,0 +1,34 @@
+# Task 8: Edge Deployment
+# Tiny model optimized for edge/mobile deployment
+# Tests: efficiency constraints, model compression
+
+name: "edge-classifier"
+description: "Tiny efficient model for edge deployment experiments"
+
+modality:
+  inputs: ["image"]
+  outputs: ["text"]
+
+architecture:
+  family: "cnn"
+  variant: "mobilenet"
+  attention: "none"
+  context_length: 1
+
+constraints:
+  parameters: "5M"
+  latency: "5ms"
+  device: "mobile"
+  image_size: 224
+  quantization: "int8"
+
+training:
+  objective: ["cross_entropy", "knowledge_distillation"]
+  optimizer: "sgd"
+  scheduler: "step"
+  batch_size: 128
+  epochs: 100
+
+evaluation:
+  benchmarks: ["accuracy", "latency", "memory_footprint"]
+  datasets: ["synthetic_imagenet"]

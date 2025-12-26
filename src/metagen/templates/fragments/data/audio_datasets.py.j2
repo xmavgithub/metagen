@@ -1,0 +1,21 @@
+# Audio dataset fragment.
+import torch
+from torch.utils.data import Dataset
+
+
+class SyntheticAudioDataset(Dataset):
+    def __init__(
+        self,
+        size: int = 1000,
+        channels: int = {{ blueprint.num_channels or 1 }},
+        length: int = 16000,
+    ) -> None:
+        self.size = size
+        self.channels = channels
+        self.length = length
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int) -> torch.Tensor:
+        return torch.randn(self.channels, self.length)

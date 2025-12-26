@@ -1,0 +1,34 @@
+# Task 7: Multimodal Retrieval
+# CLIP-style contrastive learning model
+# Tests: multimodal, contrastive learning
+
+name: "clip-tiny"
+description: "Small CLIP-style model for multimodal retrieval experiments"
+
+modality:
+  inputs: ["text", "image"]
+  outputs: ["embedding"]
+
+architecture:
+  family: "transformer"
+  variant: "dual-encoder"
+  attention: "full"
+  context_length: 77
+
+constraints:
+  parameters: "150M"
+  latency: "20ms"
+  device: "gpu"
+  image_size: 224
+  embedding_dim: 512
+
+training:
+  objective: ["contrastive", "clip"]
+  optimizer: "adamw"
+  scheduler: "cosine_warmup"
+  batch_size: 256
+  epochs: 30
+
+evaluation:
+  benchmarks: ["retrieval_accuracy", "zero_shot_accuracy"]
+  datasets: ["synthetic_pairs"]

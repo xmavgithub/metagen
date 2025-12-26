@@ -1,0 +1,11 @@
+# CODEOWNERS - Defines who must review changes to specific files
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: xmavgithub must approve all changes
+* @xmavgithub
+
+# Critical files require explicit approval
+/.github/ @xmavgithub
+/src/metagen/ @xmavgithub
+/pyproject.toml @xmavgithub
+/SECURITY.md @xmavgithub

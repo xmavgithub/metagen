@@ -1,0 +1,13 @@
+# Masked language modeling loss fragment.
+import torch
+import torch.nn.functional as F
+
+
+def masked_lm_loss(
+    logits: torch.Tensor,
+    targets: torch.Tensor,
+    mask: torch.Tensor,
+) -> torch.Tensor:
+    masked_logits = logits[mask]
+    masked_targets = targets[mask]
+    return F.cross_entropy(masked_logits, masked_targets)

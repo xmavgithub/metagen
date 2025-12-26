@@ -1,0 +1,34 @@
+# Task 5: Audio Generation
+# Transformer-based audio generation model
+# Tests: audio modality, sequence-to-sequence
+
+name: "audio-gen-small"
+description: "Small transformer for audio generation experiments"
+
+modality:
+  inputs: ["text"]
+  outputs: ["audio"]
+
+architecture:
+  family: "transformer"
+  variant: "encoder-decoder"
+  attention: "full"
+  context_length: 2048
+
+constraints:
+  parameters: "300M"
+  latency: "100ms"
+  device: "gpu"
+  sample_rate: 16000
+  audio_length: 5.0
+
+training:
+  objective: ["cross_entropy", "reconstruction"]
+  optimizer: "adamw"
+  scheduler: "cosine"
+  batch_size: 16
+  epochs: 50
+
+evaluation:
+  benchmarks: ["audio_quality", "melody_accuracy"]
+  datasets: ["synthetic_audio"]

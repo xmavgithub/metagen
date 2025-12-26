@@ -1,0 +1,32 @@
+# Task 2: Text Generation
+# A decoder-only transformer for autoregressive text generation
+# Tests: decoder architecture, autoregressive training
+
+name: "text-gen-small"
+description: "Small decoder-only transformer for text generation experiments"
+
+modality:
+  inputs: ["text"]
+  outputs: ["text"]
+
+architecture:
+  family: "transformer"
+  variant: "decoder-only"
+  attention: "causal"
+  context_length: 1024
+
+constraints:
+  parameters: "350M"
+  latency: "50ms"
+  device: "gpu"
+
+training:
+  objective: ["cross_entropy"]
+  optimizer: "adamw"
+  scheduler: "cosine_warmup"
+  batch_size: 16
+  epochs: 5
+
+evaluation:
+  benchmarks: ["perplexity", "generation_quality"]
+  datasets: ["synthetic_text"]

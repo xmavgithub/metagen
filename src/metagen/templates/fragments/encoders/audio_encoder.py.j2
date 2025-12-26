@@ -1,0 +1,33 @@
+# Audio encoder fragment.
+import torch
+import torch.nn as nn
+
+
+class AudioEncoder(nn.Module):
+    def __init__(
+        self,
+        hidden_size: int = {{ blueprint.dims.hidden_size }},
+        layers: int = {{ blueprint.dims.layers }},
+        heads: int = {{ blueprint.dims.heads }},
+    ) -> None:
+        super().__init__()
+        self.conv = nn.Conv1d(hidden_size, hidden_size, kernel_size=5, padding=2)
+        self.blocks = nn.ModuleList(
+            [
+                nn.TransformerEncoderLayer(
+                    d_model=hidden_size,
+                    nhead=heads,
+                    batch_first=True,
+                )
+                for _ in range(max(1, layers // 2))
+            ]
+        )
+        self.norm = nn.LayerNorm(hidden_size)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (batch, channels, time) or (batch, time, hidden)
+        if x.dim() == 3 and x.shape[1] != x.shape[-1]:
+            x = self.conv(x).transpose(1, 2)
+        for block in self.blocks:
+            x = block(x)
+        return self.norm(x)

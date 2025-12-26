@@ -1,0 +1,27 @@
+# Multi-modal dataset fragment.
+import torch
+from torch.utils.data import Dataset
+
+
+class SyntheticMultimodalDataset(Dataset):
+    def __init__(
+        self,
+        size: int = 500,
+        seq_len: int = {{ blueprint.max_seq_len or 128 }},
+        vocab_size: int = {{ blueprint.vocab_size or 50257 }},
+        image_size: int = {{ blueprint.image_size or 224 }},
+        channels: int = {{ blueprint.num_channels or 3 }},
+    ) -> None:
+        self.size = size
+        self.seq_len = seq_len
+        self.vocab_size = vocab_size
+        self.image_size = image_size
+        self.channels = channels
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        tokens = torch.randint(0, self.vocab_size, (self.seq_len,))
+        image = torch.randn(self.channels, self.image_size, self.image_size)
+        return tokens, image

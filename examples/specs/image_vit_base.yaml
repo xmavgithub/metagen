@@ -1,0 +1,82 @@
+# MetaGen Spec: Vision Transformer (ViT) Base
+#
+# This specification defines a Vision Transformer model for image classification.
+# The architecture follows the original ViT-Base/16 configuration from
+# "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale"
+# (Dosovitskiy et al., 2020).
+#
+# Key Parameters:
+#   - Image size: 224x224 (ImageNet standard)
+#   - Patch size: 16x16
+#   - Hidden dimension: 768
+#   - Number of layers: 12
+#   - Number of attention heads: 12
+#   - Parameter count: ~86M
+#
+# Example Usage:
+#   metagen synth examples/specs/image_vit_base.yaml --out outputs/vit_base/
+#   metagen paper examples/specs/image_vit_base.yaml --out paper/vit_base/
+#
+# See Also:
+#   - image_vit_large.yaml for ViT-Large (307M parameters)
+#   - image_diffusion_small.yaml for diffusion models
+#   - docs/user-guide/image-models.md
+
+metagen_version: "1.0"
+name: "ViT-Base/16 Image Classifier"
+version: "1.0.0"
+
+modality:
+  inputs:
+    - image
+  outputs:
+    - classification
+
+task:
+  type: classification
+  domain: image
+
+constraints:
+  device: consumer_gpu
+  latency: batch  # Not real-time, batch processing OK
+  parameter_budget:
+    min: "50M"
+    max: "100M"
+  image_size: 224
+  patch_size: 16
+
+architecture:
+  family: transformer
+  # Additional ViT-specific settings could go here
+  # depth: 12
+  # width_multiplier: 1.0
+
+training:
+  objective:
+    - classification
+  data:
+    sources:
+      - imagenet
+    size: "1.28M samples"  # ImageNet-1K training set
+  config:
+    batch_size: 256
+    learning_rate: 0.001
+    epochs: 300
+    optimizer: adamw
+    weight_decay: 0.1
+    warmup_epochs: 5
+    data_augmentation:
+      - random_resize_crop
+      - random_horizontal_flip
+      - auto_augment
+      - mixup
+      - cutmix
+
+evaluation:
+  benchmarks:
+    - imagenet_1k_top1
+    - imagenet_1k_top5
+  metrics:
+    - accuracy
+    - throughput_images_per_sec
+    - latency_ms

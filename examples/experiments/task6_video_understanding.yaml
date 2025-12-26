@@ -1,0 +1,35 @@
+# Task 6: Video Understanding
+# Spatio-temporal transformer for video classification
+# Tests: video modality, temporal modeling
+
+name: "video-classifier"
+description: "Video transformer for video understanding experiments"
+
+modality:
+  inputs: ["video"]
+  outputs: ["text"]
+
+architecture:
+  family: "transformer"
+  variant: "encoder-only"
+  attention: "spatiotemporal"
+  context_length: 1568  # 196 patches * 8 frames
+
+constraints:
+  parameters: "150M"
+  latency: "100ms"
+  device: "gpu"
+  frame_size: 224
+  num_frames: 8
+  temporal_stride: 4
+
+training:
+  objective: ["cross_entropy"]
+  optimizer: "adamw"
+  scheduler: "cosine_warmup"
+  batch_size: 8
+  epochs: 20
+
+evaluation:
+  benchmarks: ["accuracy", "temporal_consistency"]
+  datasets: ["synthetic_video"]

@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "image_diffusion_sdxl_like"
+description: "High-resolution image diffusion model with text conditioning."
+modality:
+  inputs: ["text", "image"]
+  outputs: ["image"]
+task:
+  type: "generation"
+  domain: "image"
+constraints:
+  latency: "offline"
+  device: "datacenter_gpu"
+  parameter_budget:
+    max: "6B"
+  memory_budget: "48GB"
+  context_window: "8k"
+  throughput: "2 img/s"
+training:
+  objective: ["diffusion"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "1B images"
+    governance:
+      pii: "filtered"
+      copyright: "mostly"
+  compute:
+    hardware: "64xH100"
+    duration: "14 days"
+  alignment:
+    method: ["rlaif", "constitutional"]
+    policy: "policy-aware"
+architecture:
+  family: "diffusion"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

@@ -1,0 +1,7 @@
+╔╦╗┌─┐┌┬┐┌─┐╔═╗┌─┐┌┐┌
+║║║├┤  │ ├─┤║ ╦├┤ │││
+╩ ╩└─┘ ┴ ┴ ┴╚═╝└─┘┘└┘
+
+Spec → Model
+
+One specification to generate them all.

@@ -1,0 +1,92 @@
+# MetaGen Spec: Latent Diffusion Model (Small)
+#
+# This specification defines a latent diffusion model for image generation.
+# The architecture follows a U-Net based approach similar to Stable Diffusion,
+# but with a smaller parameter budget suitable for consumer GPUs.
+#
+# Key Characteristics:
+#   - Latent space diffusion (not pixel-space)
+#   - U-Net encoder-decoder architecture
+#   - Cross-attention for conditioning (text, class labels)
+#   - Image size: 512x512 output resolution
+#   - Parameter count: ~300M-500M (vs 860M for SD 1.5)
+#
+# Architecture Overview:
+#   Input (latent) → U-Net Encoder → Bottleneck → U-Net Decoder → Output (latent)
+#                       ↑                              ↑
+#                    Cross-attention (conditioning)
+#
+# Example Usage:
+#   metagen synth examples/specs/image_diffusion_small.yaml --out outputs/diffusion_small/
+#   metagen automl examples/specs/image_diffusion_small.yaml --search-budget 20
+#
+# See Also:
+#   - image_diffusion_sdxl_like.yaml for larger SDXL-style model
+#   - image_vit_base.yaml for classification models
+#   - docs/user-guide/diffusion-models.md
+
+metagen_version: "1.0"
+name: "Latent Diffusion Model (Small)"
+version: "1.0.0"
+
+modality:
+  inputs:
+    - text  # Text conditioning (prompts)
+    - image  # Optional image conditioning
+  outputs:
+    - image  # Generated image
+
+task:
+  type: generation
+  domain: image
+
+constraints:
+  device: consumer_gpu  # Optimized for RTX 3080/4080 class GPUs
+  latency: batch  # Batch generation, not real-time
+  parameter_budget:
+    min: "200M"
+    max: "500M"
+  image_size: 512  # Output resolution
+  # Latent space is typically 1/8 of image size
+  latent_size: 64  # 512/8 = 64
+
+architecture:
+  family: diffusion
+  # U-Net specific parameters
+  # base_channels: 128
+  # channel_multipliers: [1, 2, 4, 4]
+  # num_res_blocks: 2
+  # attention_resolutions: [32, 16, 8]
+
+training:
+  objective:
+    - diffusion  # Denoising score matching
+  data:
+    sources:
+      - laion_aesthetics_5plus
+      - custom_dataset
+    size: "10M samples"
+  config:
+    batch_size: 32  # Per GPU, with gradient accumulation
+    learning_rate: 0.0001
+    epochs: 100
+    optimizer: adamw
+    weight_decay: 0.01
+    warmup_steps: 10000
+    ema_decay: 0.9999  # Exponential moving average for stable generation
+    noise_schedule: linear  # Could also be: cosine, scaled_linear
+    timesteps: 1000
+    # Classifier-free guidance training
+    unconditional_probability: 0.1
+
+evaluation:
+  benchmarks:
+    - fid_coco_30k
+    - clip_score
+    - inception_score
+  metrics:
+    - fid
+    - clip_score
+    - lpips
+    - aesthetic_score
+    - generation_time_per_image

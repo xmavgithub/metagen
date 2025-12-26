@@ -1,0 +1,8 @@
+# Diffusion loss fragment.
+import torch
+import torch.nn.functional as F
+
+
+def diffusion_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """Simple L2 loss between predicted and target noise."""
+    return F.mse_loss(pred, target)

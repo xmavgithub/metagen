@@ -1,0 +1,17 @@
+# Cross-attention fusion fragment.
+import torch
+import torch.nn as nn
+
+
+class CrossAttention(nn.Module):
+    def __init__(
+        self,
+        hidden_size: int = {{ blueprint.dims.hidden_size }},
+        heads: int = {{ blueprint.dims.heads }},
+    ) -> None:
+        super().__init__()
+        self.attn = nn.MultiheadAttention(hidden_size, heads, batch_first=True)
+
+    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor) -> torch.Tensor:
+        output, _ = self.attn(query, key, value)
+        return output

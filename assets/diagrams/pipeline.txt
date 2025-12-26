@@ -1,0 +1,73 @@
+MetaGen Pipeline Architecture
+=============================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              MetaGen Pipeline                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌───────────────┐
+                              │   YAML Spec   │
+                              │  (20 lines)   │
+                              └───────┬───────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │           Spec Loader               │
+                    │  • Parse YAML/JSON                  │
+                    │  • Validate against schema          │
+                    │  • Compute deterministic seed       │
+                    └─────────────────┬───────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │        Modality Handler             │
+                    │  • Text, Image, Audio, Video        │
+                    │  • Select architecture components   │
+                    │  • Configure embeddings/encoders    │
+                    └─────────────────┬───────────────────┘
+                                      │
+          ┌───────────────────────────┼───────────────────────────┐
+          │                           │                           │
+          ▼                           ▼                           ▼
+┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│   Architecture  │       │    Code Gen     │       │   Benchmarks    │
+│    Blueprint    │       │                 │       │                 │
+│                 │       │  • model.py     │       │  • Synthetic    │
+│  • Dimensions   │       │  • train.py     │       │    scores       │
+│  • Components   │       │  • data.py      │       │  • Pareto       │
+│  • Graph        │       │  • eval.py      │       │    analysis     │
+└────────┬────────┘       └────────┬────────┘       └────────┬────────┘
+         │                         │                         │
+         └─────────────────────────┼─────────────────────────┘
+                                   │
+                                   ▼
+                    ┌─────────────────────────────────────┐
+                    │          Paper Generator            │
+                    │                                     │
+                    │  • LaTeX sections                   │
+                    │  • Dynamic bibliography             │
+                    │  • Figures (TikZ + matplotlib)      │
+                    │  • NeurIPS-style formatting         │
+                    └─────────────────┬───────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Output Package                                    │
+├─────────────────┬─────────────────┬─────────────────┬─────────────────────┤
+│    blueprint/   │     code/       │      docs/      │       paper/        │
+├─────────────────┼─────────────────┼─────────────────┼─────────────────────┤
+│ architecture.   │ model.py        │ model_card.md   │ main.tex            │
+│   yaml          │ train.py        │ data_card.md    │ sections/           │
+│ graph.json      │ data.py         │ eval_report.md  │ figures/            │
+│ params.json     │ eval.py         │ limitations.md  │ bibliography.bib    │
+│ ablations.yaml  │ infer.py        │ summary.json    │ Makefile            │
+└─────────────────┴─────────────────┴─────────────────┴─────────────────────┘
+
+
+Key Properties
+==============
+
+• Deterministic: Same spec + seed = identical outputs
+• Multi-modal: Text, Image, Audio, Video, 3D
+• Extensible: Modality handlers, architecture families
+• Complete: Code, docs, benchmarks, paper in one run

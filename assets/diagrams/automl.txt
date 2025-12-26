@@ -1,0 +1,92 @@
+MetaGen AutoML Architecture Search
+===================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           AutoML Search Flow                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌───────────────┐
+                              │   Spec with   │
+                              │  Constraints  │
+                              └───────┬───────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │         Search Engine               │
+                    │                                     │
+                    │  Strategy: Random │ Evolution       │
+                    │  Budget: N candidates               │
+                    │  Objectives: params, latency, perf  │
+                    └─────────────────┬───────────────────┘
+                                      │
+              ┌───────────────────────┴───────────────────────┐
+              │                                               │
+              ▼                                               ▼
+    ┌─────────────────────┐                     ┌─────────────────────┐
+    │   Random Search     │                     │  Evolutionary       │
+    │                     │                     │                     │
+    │  • Sample uniform   │                     │  • Initialize pop   │
+    │  • Fast exploration │                     │  • Mutate/crossover │
+    │  • Good for small   │                     │  • Select fittest   │
+    │    budgets          │                     │  • Iterate gens     │
+    └──────────┬──────────┘                     └──────────┬──────────┘
+               │                                           │
+               └─────────────────┬─────────────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────────────────┐
+                    │       Candidate Evaluation          │
+                    │                                     │
+                    │  For each candidate:                │
+                    │  • Estimate parameters              │
+                    │  • Estimate latency                 │
+                    │  • Compute heuristic score          │
+                    │  • (Optional) Train prototype       │
+                    └─────────────────┬───────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │       Multi-Objective Analysis      │
+                    │                                     │
+                    │  • Compute Pareto front             │
+                    │  • Rank by combined score           │
+                    │  • Identify trade-offs              │
+                    └─────────────────┬───────────────────┘
+                                      │
+                                      ▼
+              ┌───────────────────────┴───────────────────────┐
+              │                                               │
+              ▼                                               ▼
+    ┌─────────────────────┐                     ┌─────────────────────┐
+    │   Top-K Results     │                     │   Pareto Front      │
+    │                     │                     │                     │
+    │  Rank │ Params │ ⋯  │                     │     Score           │
+    │  ─────┼────────┼──  │                     │       ▲             │
+    │    1  │  7.5B  │    │                     │   ★   │   ★         │
+    │    2  │  6.8B  │    │                     │       │ ★           │
+    │    3  │  5.9B  │    │                     │   ★   │     ★       │
+    └─────────────────────┘                     │       └──────────►  │
+                                                │           Params    │
+                                                └─────────────────────┘
+
+
+Search Dimensions
+=================
+
+┌────────────────┬─────────────┬────────────────────────────────────────────┐
+│   Dimension    │    Range    │              Description                   │
+├────────────────┼─────────────┼────────────────────────────────────────────┤
+│ hidden_size    │  256-8192   │ Model embedding dimension                  │
+│ num_layers     │    4-64     │ Number of transformer layers               │
+│ num_heads      │   4-128     │ Attention heads                            │
+│ ffn_multiplier │    2-8      │ FFN hidden size multiplier                 │
+└────────────────┴─────────────┴────────────────────────────────────────────┘
+
+Objectives
+==========
+
+• Parameters:   Minimize total parameter count
+• Latency:      Minimize inference time
+• Performance:  Maximize capability (heuristic)
+
+→ Pareto-optimal solutions balance all three

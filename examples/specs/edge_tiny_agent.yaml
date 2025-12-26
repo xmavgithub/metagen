@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "edge_tiny_agent"
+description: "Compact on-device assistant optimized for edge latency."
+modality:
+  inputs: ["text"]
+  outputs: ["text"]
+task:
+  type: "generation"
+  domain: "assistant"
+constraints:
+  latency: "real-time"
+  device: "edge"
+  parameter_budget:
+    max: "350M"
+  memory_budget: "2GB"
+  context_window: "8k"
+  throughput: "60 tok/s"
+training:
+  objective: ["instruction_tuning", "autoregressive"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "120B tokens"
+    governance:
+      pii: "filtered"
+      copyright: "mostly"
+  compute:
+    hardware: "64xA100"
+    duration: "5 days"
+  alignment:
+    method: ["rlaif"]
+    policy: "on-device-safe"
+architecture:
+  family: "transformer"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "audio_musicgen_like"
+description: "Text-to-music generator with multi-instrument coherence."
+modality:
+  inputs: ["text", "audio"]
+  outputs: ["audio"]
+task:
+  type: "generation"
+  domain: "audio"
+constraints:
+  latency: "near-real-time"
+  device: "consumer_gpu"
+  parameter_budget:
+    max: "3B"
+  memory_budget: "24GB"
+  context_window: "64k"
+  throughput: "30s clip/min"
+training:
+  objective: ["diffusion", "autoregressive"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "200M clips"
+    governance:
+      pii: "filtered"
+      copyright: "mostly"
+  compute:
+    hardware: "32xA100"
+    duration: "10 days"
+  alignment:
+    method: ["rlaif"]
+    policy: "harmonic"
+architecture:
+  family: "hybrid"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

@@ -1,0 +1,7 @@
+# Reconstruction loss fragment.
+import torch
+import torch.nn.functional as F
+
+
+def reconstruction_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    return F.mse_loss(pred, target)

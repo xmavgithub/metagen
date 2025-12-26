@@ -1,0 +1,21 @@
+# Text dataset fragment.
+import torch
+from torch.utils.data import Dataset
+
+
+class SyntheticTextDataset(Dataset):
+    def __init__(
+        self,
+        size: int = 1000,
+        seq_len: int = {{ blueprint.max_seq_len or 128 }},
+        vocab_size: int = {{ blueprint.vocab_size or 50257 }},
+    ) -> None:
+        self.size = size
+        self.seq_len = seq_len
+        self.vocab_size = vocab_size
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int) -> torch.Tensor:
+        return torch.randint(0, self.vocab_size, (self.seq_len,))

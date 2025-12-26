@@ -1,0 +1,40 @@
+metagen_version: "1.0"
+name: "multimodal_clip"
+description: "CLIP-style contrastive model aligning text and images."
+modality:
+  inputs: ["text", "image"]
+  outputs: ["text", "image"]
+task:
+  type: "retrieval"
+  domain: "multimodal"
+constraints:
+  latency: "near-real-time"
+  device: "consumer_gpu"
+  parameter_budget:
+    max: "800M"
+  memory_budget: "16GB"
+  context_window: "8k"
+training:
+  objective: ["contrastive"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "100M pairs"
+    governance:
+      pii: "filtered"
+      copyright: "licensed"
+  compute:
+    hardware: "8xA100"
+    duration: "4 days"
+architecture:
+  family: "transformer"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

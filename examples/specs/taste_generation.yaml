@@ -1,0 +1,44 @@
+metagen_version: "1.0"
+name: "taste_generation"
+description: "Speculative flavor synthesis model with sensory proxies."
+modality:
+  inputs: ["text", "image"]
+  outputs: ["taste"]
+task:
+  type: "generation"
+  domain: "sensory"
+constraints:
+  latency: "offline"
+  device: "datacenter_gpu"
+  parameter_budget:
+    max: "1B"
+  memory_budget: "12GB"
+  context_window: "4k"
+  throughput: "1 sample/s"
+training:
+  objective: ["diffusion"]
+  data:
+    sources: ["synthetic"]
+    size: "unknown but large"
+    governance:
+      pii: "n/a"
+      copyright: "n/a"
+  compute:
+    hardware: "8xH100"
+    duration: "2 days"
+  alignment:
+    method: ["rlaif"]
+    policy: "palate-safe"
+architecture:
+  family: "hybrid"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"

@@ -1,0 +1,33 @@
+# Task 4: Image Generation
+# U-Net diffusion model for image generation
+# Tests: diffusion architecture, denoising training
+
+name: "diffusion-tiny"
+description: "Small U-Net diffusion model for image generation experiments"
+
+modality:
+  inputs: ["text"]
+  outputs: ["image"]
+
+architecture:
+  family: "diffusion"
+  variant: "unet"
+  attention: "cross"
+  context_length: 77  # CLIP text encoder context
+
+constraints:
+  parameters: "200M"
+  latency: "500ms"
+  device: "gpu"
+  image_size: 256
+
+training:
+  objective: ["diffusion", "mse"]
+  optimizer: "adamw"
+  scheduler: "constant_warmup"
+  batch_size: 8
+  epochs: 100
+
+evaluation:
+  benchmarks: ["fid", "inception_score"]
+  datasets: ["synthetic_images"]

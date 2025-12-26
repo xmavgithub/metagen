@@ -1,0 +1,40 @@
+metagen_version: "1.0"
+name: "video_generation"
+description: "Video generation model for short clips."
+modality:
+  inputs: ["video"]
+  outputs: ["video"]
+task:
+  type: "generation"
+  domain: "video"
+constraints:
+  latency: "offline"
+  device: "datacenter_gpu"
+  parameter_budget:
+    max: "2B"
+  memory_budget: "32GB"
+  context_window: "16k"
+training:
+  objective: ["diffusion"]
+  data:
+    sources: ["licensed", "synthetic"]
+    size: "5M clips"
+    governance:
+      pii: "filtered"
+      copyright: "licensed"
+  compute:
+    hardware: "16xA100"
+    duration: "5 days"
+architecture:
+  family: "cnn"
+  components:
+    - name: "SpecEncoder"
+      type: "transformer_encoder"
+    - name: "ModelLatent"
+      type: "hypernetwork_latent"
+    - name: "ArchitectureSynth"
+      type: "graph_generator"
+    - name: "LossComposer"
+      type: "objective_mixer"
+    - name: "PaperHead"
+      type: "latex_decoder"
