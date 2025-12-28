@@ -108,9 +108,15 @@ def train(
                 if y is not None:
                     loss = criterion(output.view(-1, output.size(-1)), y.view(-1))
                 else:
-                    loss = output.sum() * 0.0
+                    raise ValueError("Vocab-based model requires targets (y) for training. Ensure data loader provides them or auto-regressive shifting works.")
                 {% else %}
-                loss = criterion(output, y) if y is not None else output.pow(2).mean()
+                if y is not None:
+                    loss = criterion(output, y)
+                else:
+                    # For continuous outputs, if specific targets aren't provided,
+                    # we often use reconstruction (MSE against input) or similar self-supervised objective.
+                    # But to be explicit and safe:
+                     raise ValueError("Model requires targets (y) for training. If self-supervised, ensure data loader yields targets.")
                 {% endif %}
             
             # Backward

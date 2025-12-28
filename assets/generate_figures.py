@@ -131,7 +131,7 @@ def generate_ablation():
     bars = ax.barh(components, scores, color=colors, edgecolor='white', linewidth=1.5)
 
     # Add value labels
-    for bar, score in zip(bars, scores, strict=False):
+    for bar, score in zip(bars, scores, strict=True):
         ax.text(score + 0.01, bar.get_y() + bar.get_height()/2,
                 f'{score:.3f}', va='center', fontsize=10)
 
