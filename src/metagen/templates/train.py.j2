@@ -328,26 +328,66 @@ if __name__ == "__main__":
     sys.path.append(script_dir)
     
     from model import MetaGenModel
-    from data import available_sample_data, load_data
+    from data import (
+        available_sample_data,
+        list_remote_datasets,
+        suggested_remote_datasets,
+        load_data,
+    )
     
     parser = argparse.ArgumentParser(description="Train MetaGen model")
     parser.add_argument("--data", type=str, default=None, help="Path to training data (.bin or .txt)")
     parser.add_argument(
+        "--dataset",
+        type=str,
+        default=None,
+        help="Remote dataset name (from --list-datasets or hf:<path>).",
+    )
+    parser.add_argument(
+        "--dataset-split",
+        type=str,
+        default="train",
+        help="Split name for remote datasets (default: train).",
+    )
+    parser.add_argument(
+        "--dataset-size",
+        type=int,
+        default=1024,
+        help="Max samples to load from remote datasets (0 = full split).",
+    )
+    parser.add_argument(
+        "--dataset-config",
+        type=str,
+        default=None,
+        help="Optional dataset config name (Hugging Face).",
+    )
+    parser.add_argument(
+        "--dataset-cache-dir",
+        type=str,
+        default=None,
+        help="Optional cache directory for remote datasets.",
+    )
+    parser.add_argument(
         "--sample-data",
         type=str,
         default=None,
-        help="Use a bundled sample dataset by name (auto, text_shakespeare, synthetic_*).",
+        help="Use a synthetic dataset by name (auto, synthetic_*).",
     )
     parser.add_argument(
         "--sample-size",
         type=int,
         default=256,
-        help="Max samples to use for sample datasets.",
+        help="Max samples to use for synthetic datasets.",
     )
     parser.add_argument(
         "--list-sample-data",
         action="store_true",
         help="List available sample dataset names and exit.",
+    )
+    parser.add_argument(
+        "--list-datasets",
+        action="store_true",
+        help="List curated remote datasets and exit.",
     )
     parser.add_argument("--epochs", type=int, default=1, help="Number of epochs")
     parser.add_argument("--batch-size", type=int, default=4, help="Batch size")
@@ -376,12 +416,33 @@ if __name__ == "__main__":
         help="Loss threshold for early stopping in prototype mode.",
     )
     args = parser.parse_args()
-    
+
+    if args.list_datasets:
+        suggested = suggested_remote_datasets()
+        if suggested:
+            print("Suggested remote datasets for this task:")
+            for name in suggested:
+                print(f"  - {name}")
+        else:
+            print("No curated remote datasets for this task. Use --sample-data or hf:<path>.")
+        print("Curated remote datasets:")
+        for name, desc in list_remote_datasets():
+            if desc:
+                print(f"  - {name}: {desc}")
+            else:
+                print(f"  - {name}")
+        sys.exit(0)
+
     if args.list_sample_data:
         print("Available sample datasets:")
         for name in available_sample_data():
             print(f"  - {name}")
         sys.exit(0)
+
+    selections = [bool(args.data), bool(args.dataset), bool(args.sample_data)]
+    if sum(selections) > 1:
+        print("Error: choose only one of --data, --dataset, or --sample-data.")
+        sys.exit(2)
 
     print("Initializing model...")
     model = MetaGenModel()
@@ -408,13 +469,25 @@ if __name__ == "__main__":
 
         loader = _prototype_loader()
     else:
-        sample_size = args.sample_size if (args.sample_data or not args.data) else None
-        loader = load_data(
-            data_path=args.data,
-            batch_size=args.batch_size,
-            sample_data=args.sample_data,
-            sample_size=sample_size,
-        )
+        if args.dataset:
+            dataset_size = None if args.dataset_size == 0 else args.dataset_size
+            loader = load_data(
+                data_path=args.data,
+                batch_size=args.batch_size,
+                dataset=args.dataset,
+                dataset_split=args.dataset_split,
+                dataset_size=dataset_size,
+                dataset_config=args.dataset_config,
+                dataset_cache_dir=args.dataset_cache_dir,
+            )
+        else:
+            sample_size = args.sample_size if (args.sample_data or not args.data) else None
+            loader = load_data(
+                data_path=args.data,
+                batch_size=args.batch_size,
+                sample_data=args.sample_data,
+                sample_size=sample_size,
+            )
     
     print("Starting training...")
     try:

@@ -12,6 +12,11 @@ except ImportError:  # pragma: no cover
     Dataset = object
     DataLoader = object
 
+try:
+    from datasets import load_dataset
+except ImportError:  # pragma: no cover
+    load_dataset = None
+
 
 HEAD_TYPE = "{{ task_components.head_type if task_components else '' }}"
 LOSS_TYPE = "{{ task_components.loss_type if task_components else '' }}"
@@ -30,14 +35,12 @@ NUM_ACTIONS = {{ blueprint.num_actions or spec.task.num_actions or 4 }}
 ACTION_DIM = {{ blueprint.action_dim or spec.task.action_dim or 2 }}
 EMBEDDING_DIM = {{ blueprint.embedding_dim or spec.task.embedding_dim or blueprint.dims.hidden_size }}
 NUM_NODES = 16
-
-
-INLINE_TEXT_SAMPLE = (
-    "To be, or not to be, that is the question.\n"
-    "Whether 'tis nobler in the mind to suffer\n"
-    "The slings and arrows of outrageous fortune,\n"
-    "Or to take arms against a sea of troubles.\n"
-)
+INPUT_MODALITIES = {
+    {% for m in spec.modality.inputs %}"{{ m | lower }}"{% if not loop.last %}, {% endif %}{% endfor %}
+}
+OUTPUT_MODALITIES = {
+    {% for m in spec.modality.outputs %}"{{ m | lower }}"{% if not loop.last %}, {% endif %}{% endfor %}
+}
 
 
 class SyntheticTextDataset(Dataset):
@@ -71,24 +74,6 @@ class FileTextDataset(Dataset):
         # Modulo vocab_size to stay in bounds
         vocab_size = {{ blueprint.vocab_size or 50257 }}
         self.data = [ord(c) % vocab_size for c in self.text]
-
-    def __len__(self):
-        return max(0, len(self.data) - self.seq_len)
-
-    def __getitem__(self, idx):
-        if not torch:
-            return []
-        chunk = self.data[idx : idx + self.seq_len]
-        return torch.tensor(chunk, dtype=torch.long)
-
-
-class InlineTextDataset(Dataset):
-    """Loads text from an inline string for quick demos."""
-
-    def __init__(self, text: str, seq_len={{ blueprint.max_seq_len or 128 }}):
-        self.seq_len = seq_len
-        vocab_size = {{ blueprint.vocab_size or 50257 }}
-        self.data = [ord(c) % vocab_size for c in text]
 
     def __len__(self):
         return max(0, len(self.data) - self.seq_len)
@@ -420,27 +405,6 @@ class SyntheticRLDataset(Dataset):
         return x, y
 
 
-def _find_examples_data_root() -> Path | None:
-    for base in (Path.cwd(), Path(__file__).resolve().parent):
-        for parent in [base] + list(base.parents):
-            candidate = parent / "examples" / "data"
-            if candidate.exists():
-                return candidate
-    return None
-
-
-def _build_shakespeare_dataset(seq_len: int) -> Dataset:
-    data_root = _find_examples_data_root()
-    if data_root:
-        txt_path = data_root / "input.txt"
-        if txt_path.exists():
-            return FileTextDataset(str(txt_path), seq_len=seq_len)
-        bin_path = data_root / "train.bin"
-        if bin_path.exists():
-            return BinaryTokenDataset(str(bin_path), seq_len=seq_len)
-    return InlineTextDataset(INLINE_TEXT_SAMPLE, seq_len=seq_len)
-
-
 def _auto_sample_name() -> str:
     if HEAD_TYPE in {
         "classification_head",
@@ -466,12 +430,11 @@ def _auto_sample_name() -> str:
     if HEAD_TYPE in {"rl_policy_head", "rl_value_head", "rl_actor_critic_head", "rl_model_head"}:
         return "synthetic_rl"
     if VOCAB_SIZE:
-        return "text_shakespeare"
+        return "synthetic_text"
     return "synthetic_reconstruction"
 
 
 SAMPLE_DATASETS = {
-    "text_shakespeare": lambda seq_len: _build_shakespeare_dataset(seq_len),
     "synthetic_text": lambda seq_len: SyntheticTextDataset(size=256, seq_len=seq_len),
     "synthetic_classification": lambda seq_len: SyntheticClassificationDataset(
         size=256, seq_len=seq_len
@@ -511,6 +474,994 @@ SAMPLE_DATASETS = {
     ),
 }
 
+REMOTE_DATASETS = {
+    "hf:wikitext-2": {
+        "provider": "hf",
+        "path": "wikitext",
+        "name": "wikitext-2-raw-v1",
+        "category": "text_lm",
+        "description": "Wikitext-2 raw tokens (small).",
+        "text_field": "text",
+    },
+    "hf:wikitext-103": {
+        "provider": "hf",
+        "path": "wikitext",
+        "name": "wikitext-103-raw-v1",
+        "category": "text_lm",
+        "description": "Wikitext-103 raw tokens (medium).",
+        "text_field": "text",
+    },
+    "hf:openwebtext": {
+        "provider": "hf",
+        "path": "openwebtext",
+        "category": "text_lm",
+        "description": "OpenWebText (large).",
+        "text_field": "text",
+    },
+    "hf:c4": {
+        "provider": "hf",
+        "path": "c4",
+        "name": "en",
+        "category": "text_lm",
+        "description": "Colossal Clean Crawled Corpus (very large).",
+        "text_field": "text",
+    },
+    "hf:ag_news": {
+        "provider": "hf",
+        "path": "ag_news",
+        "category": "text_classification",
+        "description": "AG News topic classification.",
+        "text_field": "text",
+        "label_field": "label",
+    },
+    "hf:imdb": {
+        "provider": "hf",
+        "path": "imdb",
+        "category": "text_classification",
+        "description": "IMDb movie reviews sentiment.",
+        "text_field": "text",
+        "label_field": "label",
+    },
+    "hf:yelp_polarity": {
+        "provider": "hf",
+        "path": "yelp_polarity",
+        "category": "text_classification",
+        "description": "Yelp polarity reviews.",
+        "text_field": "text",
+        "label_field": "label",
+    },
+    "hf:dbpedia_14": {
+        "provider": "hf",
+        "path": "dbpedia_14",
+        "category": "text_classification",
+        "description": "DBPedia 14-class ontology.",
+        "label_field": "label",
+    },
+    "hf:glue/qqp": {
+        "provider": "hf",
+        "path": "glue",
+        "name": "qqp",
+        "category": "text_pair",
+        "description": "Quora question pairs.",
+        "pair_fields": ("question1", "question2"),
+        "label_field": "label",
+    },
+    "hf:glue/mrpc": {
+        "provider": "hf",
+        "path": "glue",
+        "name": "mrpc",
+        "category": "text_pair",
+        "description": "MRPC paraphrase corpus.",
+        "pair_fields": ("sentence1", "sentence2"),
+        "label_field": "label",
+    },
+    "hf:glue/stsb": {
+        "provider": "hf",
+        "path": "glue",
+        "name": "stsb",
+        "category": "text_regression",
+        "description": "Semantic textual similarity benchmark.",
+        "pair_fields": ("sentence1", "sentence2"),
+        "label_field": "label",
+    },
+    "hf:snli": {
+        "provider": "hf",
+        "path": "snli",
+        "category": "text_pair",
+        "description": "SNLI entailment pairs.",
+        "pair_fields": ("premise", "hypothesis"),
+        "label_field": "label",
+    },
+    "hf:mnist": {
+        "provider": "hf",
+        "path": "mnist",
+        "category": "image_classification",
+        "description": "MNIST handwritten digits.",
+    },
+    "hf:fashion_mnist": {
+        "provider": "hf",
+        "path": "fashion_mnist",
+        "category": "image_classification",
+        "description": "Fashion-MNIST apparel classification.",
+    },
+    "hf:cifar10": {
+        "provider": "hf",
+        "path": "cifar10",
+        "category": "image_classification",
+        "description": "CIFAR-10 images.",
+    },
+    "hf:food101": {
+        "provider": "hf",
+        "path": "food101",
+        "category": "image_classification",
+        "description": "Food-101 images.",
+    },
+    "hf:cppe-5": {
+        "provider": "hf",
+        "path": "cppe-5",
+        "category": "detection",
+        "description": "PPE object detection (small).",
+        "image_field": "image",
+        "objects_field": "objects",
+    },
+    "hf:coco": {
+        "provider": "hf",
+        "path": "coco",
+        "name": "2017",
+        "category": "detection",
+        "description": "COCO 2017 detection/segmentation (large).",
+        "image_field": "image",
+        "objects_field": "objects",
+    },
+    "hf:oxford_iiit_pet": {
+        "provider": "hf",
+        "path": "oxford_iiit_pet",
+        "category": "segmentation",
+        "description": "Oxford-IIIT Pet segmentation.",
+        "image_field": "image",
+        "mask_field": "mask",
+    },
+    "hf:ade20k": {
+        "provider": "hf",
+        "path": "ade20k",
+        "category": "segmentation",
+        "description": "ADE20K scene parsing (large).",
+        "image_field": "image",
+        "mask_field": "annotation",
+    },
+    "hf:monash_tsf/traffic": {
+        "provider": "hf",
+        "path": "monash_tsf",
+        "name": "traffic",
+        "category": "time_series",
+        "description": "Monash TSF traffic series.",
+        "series_field": "target",
+    },
+    "hf:monash_tsf/electricity": {
+        "provider": "hf",
+        "path": "monash_tsf",
+        "name": "electricity",
+        "category": "time_series",
+        "description": "Monash TSF electricity series.",
+        "series_field": "target",
+    },
+    "hf:monash_tsf/m4_hourly": {
+        "provider": "hf",
+        "path": "monash_tsf",
+        "name": "m4_hourly",
+        "category": "time_series",
+        "description": "M4 hourly time series (large).",
+        "series_field": "target",
+    },
+    "hf:adult": {
+        "provider": "hf",
+        "path": "adult",
+        "category": "tabular_classification",
+        "description": "Adult census income classification.",
+    },
+    "hf:bank": {
+        "provider": "hf",
+        "path": "bank",
+        "category": "tabular_classification",
+        "description": "Bank marketing classification.",
+    },
+    "hf:credit_card_default": {
+        "provider": "hf",
+        "path": "credit_card_default",
+        "category": "tabular_classification",
+        "description": "Credit card default prediction.",
+    },
+    "hf:california_housing": {
+        "provider": "hf",
+        "path": "california_housing",
+        "category": "tabular_regression",
+        "description": "California housing regression.",
+    },
+    "hf:diabetes": {
+        "provider": "hf",
+        "path": "diabetes",
+        "category": "tabular_regression",
+        "description": "Diabetes progression regression.",
+    },
+    "hf:speech_commands": {
+        "provider": "hf",
+        "path": "speech_commands",
+        "category": "audio_classification",
+        "description": "Speech Commands keywords.",
+        "audio_field": "audio",
+        "label_field": "label",
+    },
+    "hf:esc50": {
+        "provider": "hf",
+        "path": "esc50",
+        "category": "audio_classification",
+        "description": "ESC-50 environmental sounds.",
+        "audio_field": "audio",
+        "label_field": "label",
+    },
+    "hf:common_voice": {
+        "provider": "hf",
+        "path": "common_voice",
+        "name": "en",
+        "category": "audio_classification",
+        "description": "Common Voice English (large).",
+        "audio_field": "audio",
+        "text_field": "sentence",
+    },
+    "hf:librispeech_asr": {
+        "provider": "hf",
+        "path": "librispeech_asr",
+        "name": "clean",
+        "category": "audio_classification",
+        "description": "LibriSpeech ASR (large).",
+        "audio_field": "audio",
+        "text_field": "text",
+    },
+    "hf:ucf101": {
+        "provider": "hf",
+        "path": "ucf101",
+        "category": "video_classification",
+        "description": "UCF101 action recognition.",
+    },
+    "hf:kinetics400": {
+        "provider": "hf",
+        "path": "kinetics400",
+        "category": "video_classification",
+        "description": "Kinetics-400 actions (large).",
+    },
+    "hf:something_something_v2": {
+        "provider": "hf",
+        "path": "something_something_v2",
+        "category": "video_classification",
+        "description": "Something-Something V2 (large).",
+    },
+    "hf:coco_captions": {
+        "provider": "hf",
+        "path": "coco_captions",
+        "category": "multimodal",
+        "description": "COCO image-caption pairs.",
+        "image_field": "image",
+        "text_field": "caption",
+    },
+    "hf:flickr30k": {
+        "provider": "hf",
+        "path": "flickr30k",
+        "category": "multimodal",
+        "description": "Flickr30k image-caption pairs.",
+        "image_field": "image",
+        "text_field": "caption",
+    },
+    "hf:conceptual_captions": {
+        "provider": "hf",
+        "path": "conceptual_captions",
+        "category": "multimodal",
+        "description": "Conceptual Captions (large).",
+        "image_field": "image",
+        "text_field": "caption",
+    },
+    "hf:ogbn_arxiv": {
+        "provider": "hf",
+        "path": "ogbn_arxiv",
+        "category": "graph",
+        "description": "OGBN-Arxiv citation graph.",
+    },
+    "hf:ogbn_products": {
+        "provider": "hf",
+        "path": "ogbn_products",
+        "category": "graph",
+        "description": "OGBN-Products graph.",
+    },
+}
+
+DATASET_GROUPS = {
+    "language_modeling": [
+        "hf:wikitext-2",
+        "hf:wikitext-103",
+        "hf:openwebtext",
+        "hf:c4",
+    ],
+    "text_classification": [
+        "hf:ag_news",
+        "hf:imdb",
+        "hf:yelp_polarity",
+        "hf:dbpedia_14",
+    ],
+    "text_pair": ["hf:glue/qqp", "hf:glue/mrpc", "hf:snli"],
+    "text_regression": ["hf:glue/stsb"],
+    "image_classification": [
+        "hf:mnist",
+        "hf:fashion_mnist",
+        "hf:cifar10",
+        "hf:food101",
+    ],
+    "detection": ["hf:cppe-5", "hf:coco"],
+    "segmentation": ["hf:oxford_iiit_pet", "hf:ade20k", "hf:coco"],
+    "time_series": [
+        "hf:monash_tsf/traffic",
+        "hf:monash_tsf/electricity",
+        "hf:monash_tsf/m4_hourly",
+    ],
+    "tabular_classification": ["hf:adult", "hf:bank", "hf:credit_card_default"],
+    "tabular_regression": ["hf:california_housing", "hf:diabetes"],
+    "audio_classification": [
+        "hf:speech_commands",
+        "hf:esc50",
+        "hf:common_voice",
+        "hf:librispeech_asr",
+    ],
+    "video_classification": [
+        "hf:ucf101",
+        "hf:kinetics400",
+        "hf:something_something_v2",
+    ],
+    "multimodal_contrastive": [
+        "hf:coco_captions",
+        "hf:flickr30k",
+        "hf:conceptual_captions",
+    ],
+    "graph": ["hf:ogbn_arxiv", "hf:ogbn_products"],
+}
+
+PAIR_HEADS = {"embedding_head", "ranking_head"}
+GRAPH_HEADS = {
+    "graph_classification_head",
+    "node_classification_head",
+    "link_prediction_head",
+    "recommendation_head",
+}
+RL_HEADS = {"rl_policy_head", "rl_value_head", "rl_actor_critic_head", "rl_model_head"}
+CLASSIFICATION_HEADS = {
+    "classification_head",
+    "hierarchical_classification_head",
+    "graph_classification_head",
+    "node_classification_head",
+}
+
+TEXT_FIELDS = (
+    "text",
+    "sentence",
+    "sentence1",
+    "sentence2",
+    "premise",
+    "hypothesis",
+    "question",
+    "question1",
+    "question2",
+    "query",
+    "document",
+    "passage",
+    "review",
+    "content",
+    "article",
+    "abstract",
+    "title",
+    "body",
+    "caption",
+)
+IMAGE_FIELDS = ("image", "img", "pixel_values", "pixels")
+AUDIO_FIELDS = ("audio", "speech")
+VIDEO_FIELDS = ("video", "frames", "clip", "clips")
+LABEL_FIELDS = ("label", "labels", "target", "targets", "category", "class", "label_id")
+MASK_FIELDS = ("mask", "masks", "segmentation", "segmentation_mask")
+BOX_FIELDS = ("bbox", "bboxes", "boxes", "bounding_boxes", "box")
+
+
+def _resolve_task_mode() -> str:
+    if LOSS_TYPE in {"contrastive_loss", "pairwise_ranking_loss"}:
+        return "pair"
+    if HEAD_TYPE in PAIR_HEADS:
+        return "pair"
+    if HEAD_TYPE == "detection_head":
+        return "detection"
+    if HEAD_TYPE == "segmentation_head":
+        return "segmentation"
+    if HEAD_TYPE == "time_series_head":
+        return "time_series"
+    if HEAD_TYPE in RL_HEADS:
+        return "rl"
+    if HEAD_TYPE in GRAPH_HEADS:
+        return "graph"
+    if HEAD_TYPE == "regression_head":
+        return "regression"
+    if HEAD_TYPE in CLASSIFICATION_HEADS:
+        return "classification"
+    if VOCAB_SIZE:
+        return "language_modeling"
+    return "reconstruction"
+
+
+TASK_MODE = _resolve_task_mode()
+
+
+def available_remote_datasets() -> list[str]:
+    return ["auto", *sorted(REMOTE_DATASETS.keys())]
+
+
+def list_remote_datasets() -> list[tuple[str, str]]:
+    entries: list[tuple[str, str]] = []
+    for name in sorted(REMOTE_DATASETS):
+        spec = REMOTE_DATASETS[name]
+        category = spec.get("category")
+        desc = spec.get("description", "")
+        label = f"{category}: {desc}".strip(": ") if category else desc
+        entries.append((name, label))
+    return entries
+
+
+def _auto_remote_group() -> str | None:
+    if TASK_MODE == "pair":
+        return "multimodal_contrastive" if "image" in INPUT_MODALITIES else "text_pair"
+    if TASK_MODE == "detection":
+        return "detection"
+    if TASK_MODE == "segmentation":
+        return "segmentation"
+    if TASK_MODE == "time_series":
+        return "time_series"
+    if TASK_MODE == "graph":
+        return "graph"
+    if TASK_MODE == "rl":
+        if "image" in INPUT_MODALITIES:
+            return "image_classification"
+        if "tabular" in INPUT_MODALITIES:
+            return "tabular_classification"
+        if "text" in INPUT_MODALITIES:
+            return "text_classification"
+        return "text_classification"
+    if "video" in INPUT_MODALITIES:
+        return "video_classification"
+    if "audio" in INPUT_MODALITIES:
+        return "audio_classification"
+    if "image" in INPUT_MODALITIES:
+        return "image_classification"
+    if "tabular" in INPUT_MODALITIES:
+        return "tabular_regression" if TASK_MODE == "regression" else "tabular_classification"
+    if "time_series" in INPUT_MODALITIES:
+        return "time_series"
+    if TASK_MODE == "regression":
+        return "text_regression"
+    if TASK_MODE == "classification":
+        return "text_classification"
+    if TASK_MODE == "language_modeling":
+        return "language_modeling"
+    return "text_classification"
+
+
+def suggested_remote_datasets() -> list[str]:
+    group = _auto_remote_group()
+    if not group:
+        return []
+    return DATASET_GROUPS.get(group, [])
+
+
+def _resolve_remote_dataset_spec(dataset_name: str, dataset_config: str | None) -> dict:
+    if dataset_name == "auto":
+        suggestions = suggested_remote_datasets()
+        if not suggestions:
+            raise ValueError("No suggested datasets for this task. Use --sample-data instead.")
+        dataset_name = suggestions[0]
+    if dataset_name in REMOTE_DATASETS:
+        spec = dict(REMOTE_DATASETS[dataset_name])
+    else:
+        if not dataset_name.startswith("hf:"):
+            raise ValueError(
+                f"Unknown dataset '{dataset_name}'. Use --list-datasets to see curated names."
+            )
+        spec = {
+            "provider": "hf",
+            "path": dataset_name.replace("hf:", "", 1),
+            "name": None,
+            "category": "custom",
+            "description": "Custom Hugging Face dataset.",
+        }
+    if dataset_config:
+        spec["name"] = dataset_config
+    return spec
+
+
+def _resolve_hf_split(split: str | None, dataset_size: int | None) -> str:
+    split = split or "train"
+    if dataset_size is None or dataset_size <= 0:
+        return split
+    return f"{split}[:{dataset_size}]"
+
+
+def _load_hf_dataset(
+    spec: dict,
+    split: str | None,
+    dataset_size: int | None,
+    cache_dir: str | None,
+):
+    if load_dataset is None:  # pragma: no cover
+        raise RuntimeError(
+            "Hugging Face datasets not installed. Install with `pip install datasets`."
+        )
+    path = spec["path"]
+    name = spec.get("name")
+    split_spec = _resolve_hf_split(split, dataset_size)
+    if name:
+        return load_dataset(path, name, split=split_spec, cache_dir=cache_dir)
+    return load_dataset(path, split=split_spec, cache_dir=cache_dir)
+
+
+def _flatten_numeric(value) -> np.ndarray | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float, np.number)):
+        return np.asarray([value], dtype=np.float32)
+    if isinstance(value, str):
+        return None
+    if isinstance(value, dict):
+        if "array" in value:
+            return _flatten_numeric(value["array"])
+        if "data" in value:
+            return _flatten_numeric(value["data"])
+        numeric = [float(v) for v in value.values() if isinstance(v, (int, float, np.number))]
+        if numeric:
+            return np.asarray(numeric, dtype=np.float32)
+        return None
+    try:
+        arr = np.asarray(value)
+    except Exception:
+        return None
+    if arr.size == 0:
+        return None
+    if np.issubdtype(arr.dtype, np.number):
+        return arr.astype(np.float32).reshape(-1)
+    return None
+
+
+def _pad_or_truncate(array: np.ndarray, size: int, pad_value: float = 0.0) -> np.ndarray:
+    if array.size < size:
+        pad = np.full(size - array.size, pad_value, dtype=array.dtype)
+        return np.concatenate([array, pad])
+    return array[:size]
+
+
+def _to_token_sequence(value, seq_len: int, vocab_size: int) -> torch.Tensor:
+    if value is None:
+        ids = np.random.randint(0, vocab_size, size=seq_len)
+    elif isinstance(value, str):
+        ids = [ord(c) % vocab_size for c in value]
+    else:
+        flat = _flatten_numeric(value)
+        if flat is None:
+            ids = np.random.randint(0, vocab_size, size=seq_len)
+        else:
+            ids = np.abs(flat).astype(np.int64) % max(2, vocab_size)
+    ids = _pad_or_truncate(np.asarray(ids, dtype=np.int64), seq_len, pad_value=0)
+    return torch.tensor(ids, dtype=torch.long)
+
+
+def _to_feature_sequence(value, seq_len: int, hidden_size: int) -> torch.Tensor:
+    flat = _flatten_numeric(value)
+    if flat is None:
+        return torch.randn(seq_len, hidden_size)
+    flat = _pad_or_truncate(flat, seq_len * hidden_size, pad_value=0.0)
+    return torch.tensor(flat, dtype=torch.float32).view(seq_len, hidden_size)
+
+
+def _encode_input(value, seq_len: int) -> torch.Tensor:
+    if VOCAB_SIZE:
+        return _to_token_sequence(value, seq_len, max(2, VOCAB_SIZE))
+    return _to_feature_sequence(value, seq_len, HIDDEN_SIZE)
+
+
+def _extract_text(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in TEXT_FIELDS:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _extract_text_pair(sample: dict, preferred: tuple[str, str] | None):
+    if preferred and preferred[0] in sample and preferred[1] in sample:
+        return sample[preferred[0]], sample[preferred[1]]
+    keys = [key for key in TEXT_FIELDS if key in sample]
+    if len(keys) >= 2:
+        return sample[keys[0]], sample[keys[1]]
+    return None
+
+
+def _extract_image(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in IMAGE_FIELDS:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _extract_audio(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in AUDIO_FIELDS:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _extract_video(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in VIDEO_FIELDS:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _extract_label(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in LABEL_FIELDS:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _extract_objects(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    if "objects" in sample:
+        return sample["objects"]
+    return None
+
+
+def _extract_mask(sample: dict, preferred: str | None = None):
+    if preferred and preferred in sample:
+        return sample[preferred]
+    for key in MASK_FIELDS:
+        if key in sample:
+            return sample[key]
+    objects = sample.get("objects")
+    if isinstance(objects, dict):
+        for key in MASK_FIELDS:
+            if key in objects:
+                return objects[key]
+    return None
+
+
+def _extract_boxes_and_labels(sample: dict, spec: dict):
+    boxes = None
+    labels = None
+    for key in BOX_FIELDS:
+        if key in sample:
+            boxes = sample[key]
+            break
+    label_field = spec.get("label_field")
+    if label_field and label_field in sample:
+        labels = sample[label_field]
+    objects = _extract_objects(sample, spec.get("objects_field"))
+    if isinstance(objects, dict):
+        for key in BOX_FIELDS:
+            if key in objects:
+                boxes = objects[key]
+                break
+        for key in LABEL_FIELDS:
+            if key in objects:
+                labels = objects[key]
+                break
+    elif isinstance(objects, list):
+        box_list = []
+        label_list = []
+        for item in objects:
+            if not isinstance(item, dict):
+                continue
+            for key in BOX_FIELDS:
+                if key in item:
+                    box_list.append(item[key])
+                    break
+            for key in LABEL_FIELDS:
+                if key in item:
+                    label_list.append(item[key])
+                    break
+        if box_list:
+            boxes = box_list
+        if label_list:
+            labels = label_list
+    return boxes, labels
+
+
+def _extract_numeric_features(
+    sample: dict, skip_fields: set[str] | None = None
+) -> np.ndarray | None:
+    values: list[np.ndarray] = []
+    for key, value in sample.items():
+        if skip_fields and key in skip_fields:
+            continue
+        flat = _flatten_numeric(value)
+        if flat is not None:
+            values.append(flat)
+    if not values:
+        return None
+    return np.concatenate(values)
+
+
+def _coerce_label(value, num_classes: int) -> torch.Tensor:
+    if value is None:
+        return torch.randint(0, max(2, num_classes), (), dtype=torch.long)
+    if isinstance(value, (list, tuple, np.ndarray)):
+        if len(value) == 0:
+            return torch.randint(0, max(2, num_classes), (), dtype=torch.long)
+        value = value[0]
+    if isinstance(value, bool):
+        idx = int(value)
+    elif isinstance(value, (int, np.integer)):
+        idx = int(value)
+    elif isinstance(value, float):
+        idx = int(value)
+    elif isinstance(value, str):
+        idx = sum(ord(c) for c in value)
+    else:
+        idx = 0
+    return torch.tensor(idx % max(2, num_classes), dtype=torch.long)
+
+
+def _coerce_regression(value, output_dim: int) -> torch.Tensor:
+    flat = _flatten_numeric(value)
+    if flat is None or flat.size == 0:
+        return torch.randn(output_dim)
+    flat = _pad_or_truncate(flat, output_dim, pad_value=0.0)
+    return torch.tensor(flat, dtype=torch.float32)
+
+
+def _normalize_boxes(boxes) -> np.ndarray:
+    arr = np.asarray(boxes, dtype=np.float32)
+    if arr.ndim == 1:
+        arr = arr.reshape(1, -1)
+    if arr.shape[1] != 4:
+        arr = _pad_or_truncate(arr.reshape(-1), 4).reshape(1, 4)
+    max_val = float(np.max(arr)) if arr.size else 1.0
+    if max_val > 1.0:
+        arr = arr / max_val
+    return np.clip(arr, 0.0, 1.0)
+
+
+def _pad_boxes(arr: np.ndarray, target: int) -> np.ndarray:
+    if arr.shape[0] >= target:
+        return arr[:target]
+    pad = np.zeros((target - arr.shape[0], 4), dtype=np.float32)
+    return np.concatenate([arr, pad])
+
+
+def _pad_labels(arr: np.ndarray, target: int) -> np.ndarray:
+    if arr.shape[0] >= target:
+        return arr[:target]
+    pad = np.zeros((target - arr.shape[0],), dtype=np.int64)
+    return np.concatenate([arr, pad])
+
+
+def _build_detection_target(sample: dict, spec: dict) -> dict[str, torch.Tensor]:
+    boxes, labels = _extract_boxes_and_labels(sample, spec)
+    if boxes is None:
+        boxes = np.random.rand(NUM_ANCHORS, 4).astype(np.float32)
+    boxes = _normalize_boxes(boxes)
+    boxes = _pad_boxes(boxes, NUM_ANCHORS)
+    if labels is None:
+        label_arr = np.random.randint(0, max(2, NUM_CLASSES), size=(boxes.shape[0],))
+    else:
+        if not isinstance(labels, (list, tuple, np.ndarray)):
+            labels = [labels]
+        label_arr = np.asarray(
+            [_coerce_label(v, NUM_CLASSES).item() for v in labels],
+            dtype=np.int64,
+        )
+    label_arr = _pad_labels(label_arr, NUM_ANCHORS)
+    return {
+        "labels": torch.tensor(label_arr, dtype=torch.long),
+        "boxes": torch.tensor(boxes, dtype=torch.float32),
+    }
+
+
+def _build_segmentation_target(sample: dict, spec: dict) -> torch.Tensor:
+    mask = _extract_mask(sample, spec.get("mask_field"))
+    if mask is None:
+        mask_arr = np.random.randint(
+            0,
+            max(2, NUM_CLASSES),
+            size=(MASK_RESOLUTION, MASK_RESOLUTION),
+        )
+    else:
+        mask_arr = np.asarray(mask)
+        if mask_arr.ndim == 3:
+            mask_arr = mask_arr[..., 0]
+        mask_arr = np.resize(mask_arr, (MASK_RESOLUTION, MASK_RESOLUTION))
+        mask_arr = mask_arr.astype(np.int64) % max(2, NUM_CLASSES)
+    return torch.tensor(mask_arr, dtype=torch.long)
+
+
+def _build_time_series_pair(value):
+    flat = _flatten_numeric(value)
+    if flat is None or flat.size == 0:
+        return torch.randn(LOOKBACK, HIDDEN_SIZE), torch.randn(HORIZON, NUM_OUTPUTS)
+    needed = LOOKBACK * HIDDEN_SIZE + HORIZON * NUM_OUTPUTS
+    flat = _pad_or_truncate(flat, needed, pad_value=0.0)
+    x_flat = flat[: LOOKBACK * HIDDEN_SIZE]
+    y_flat = flat[LOOKBACK * HIDDEN_SIZE : LOOKBACK * HIDDEN_SIZE + HORIZON * NUM_OUTPUTS]
+    x = torch.tensor(x_flat, dtype=torch.float32).view(LOOKBACK, HIDDEN_SIZE)
+    y = torch.tensor(y_flat, dtype=torch.float32).view(HORIZON, NUM_OUTPUTS)
+    return x, y
+
+
+def _coerce_action(value) -> torch.Tensor:
+    if ACTION_SPACE == "continuous":
+        flat = _flatten_numeric(value)
+        if flat is None:
+            return torch.randn(ACTION_DIM)
+        flat = _pad_or_truncate(flat, ACTION_DIM, pad_value=0.0)
+        return torch.tensor(flat, dtype=torch.float32)
+    if value is None:
+        return torch.randint(0, max(2, NUM_ACTIONS), (), dtype=torch.long)
+    if isinstance(value, (list, tuple, np.ndarray)):
+        value = value[0] if len(value) else 0
+    return torch.tensor(int(value) % max(2, NUM_ACTIONS), dtype=torch.long)
+
+
+def _coerce_scalar(value) -> torch.Tensor:
+    if value is None:
+        return torch.randn(())
+    if isinstance(value, (list, tuple, np.ndarray)):
+        value = value[0] if len(value) else 0.0
+    try:
+        return torch.tensor(float(value))
+    except Exception:
+        return torch.randn(())
+
+
+def _extract_rl_field(sample: dict, keys: tuple[str, ...]):
+    for key in keys:
+        if key in sample:
+            return sample[key]
+    return None
+
+
+def _build_rl_target(sample: dict) -> dict | torch.Tensor:
+    action_val = _extract_rl_field(sample, ("action", "actions"))
+    reward_val = _extract_rl_field(sample, ("reward", "returns", "return"))
+    next_state_val = _extract_rl_field(sample, ("next_state", "next_observation", "next_obs"))
+    if LOSS_TYPE == "td_loss":
+        return {"targets": _coerce_scalar(reward_val)}
+    if LOSS_TYPE == "model_based_loss":
+        if next_state_val is None:
+            return {"next_state": torch.randn(HIDDEN_SIZE)}
+        flat = _flatten_numeric(next_state_val)
+        if flat is None:
+            return {"next_state": torch.randn(HIDDEN_SIZE)}
+        flat = _pad_or_truncate(flat, HIDDEN_SIZE, pad_value=0.0)
+        return {"next_state": torch.tensor(flat, dtype=torch.float32)}
+    action = _coerce_action(action_val)
+    if LOSS_TYPE == "actor_critic_loss":
+        return {
+            "actions": action,
+            "advantages": _coerce_scalar(reward_val),
+            "returns": _coerce_scalar(reward_val),
+        }
+    if LOSS_TYPE == "policy_gradient_loss":
+        return {
+            "actions": action,
+            "advantages": _coerce_scalar(reward_val),
+        }
+    return {"actions": action, "advantages": _coerce_scalar(reward_val)}
+
+
+class RemoteDatasetAdapter(Dataset):
+    def __init__(self, dataset, spec: dict, seq_len: int):
+        self.dataset = dataset
+        self.spec = spec
+        self.seq_len = seq_len
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def _primary_input(self, sample: dict):
+        if "image" in INPUT_MODALITIES:
+            value = _extract_image(sample, self.spec.get("image_field"))
+            if value is not None:
+                return value
+        if "audio" in INPUT_MODALITIES:
+            value = _extract_audio(sample, self.spec.get("audio_field"))
+            if value is not None:
+                return value
+        if "video" in INPUT_MODALITIES:
+            value = _extract_video(sample, self.spec.get("video_field"))
+            if value is not None:
+                return value
+        if "text" in INPUT_MODALITIES:
+            value = _extract_text(sample, self.spec.get("text_field"))
+            if value is not None:
+                return value
+        for extractor in (_extract_text, _extract_image, _extract_audio, _extract_video):
+            value = extractor(sample)
+            if value is not None:
+                return value
+        label_field = self.spec.get("label_field")
+        features = _extract_numeric_features(sample, {label_field} if label_field else None)
+        return features if features is not None else sample
+
+    def _pair_inputs(self, sample: dict, idx: int):
+        pair = _extract_text_pair(sample, self.spec.get("pair_fields"))
+        if pair:
+            return pair
+        if "image" in INPUT_MODALITIES and "text" in INPUT_MODALITIES:
+            image = _extract_image(sample, self.spec.get("image_field"))
+            text = _extract_text(sample, self.spec.get("text_field"))
+            if image is not None and text is not None:
+                return image, text
+        other_idx = (idx + 1) % len(self.dataset)
+        other = self.dataset[other_idx]
+        if isinstance(other, dict):
+            return self._primary_input(sample), self._primary_input(other)
+        return self._primary_input(sample), other
+
+    def __getitem__(self, idx):
+        sample = self.dataset[idx]
+        if not isinstance(sample, dict):
+            sample = {"value": sample}
+        if TASK_MODE == "pair":
+            left, right = self._pair_inputs(sample, idx)
+            return _encode_input(left, self.seq_len), _encode_input(right, self.seq_len)
+        if TASK_MODE == "detection":
+            x = _encode_input(self._primary_input(sample), self.seq_len)
+            y = _build_detection_target(sample, self.spec)
+            return x, y
+        if TASK_MODE == "segmentation":
+            x = _encode_input(self._primary_input(sample), self.seq_len)
+            y = _build_segmentation_target(sample, self.spec)
+            return x, y
+        if TASK_MODE == "time_series":
+            series = sample.get(self.spec.get("series_field", "target"))
+            if series is None:
+                series = self._primary_input(sample)
+            x, y = _build_time_series_pair(series)
+            return x, y
+        if TASK_MODE == "rl":
+            x = _encode_input(self._primary_input(sample), self.seq_len)
+            y = _build_rl_target(sample)
+            return x, y
+        if TASK_MODE == "graph":
+            label_val = _extract_label(sample, self.spec.get("label_field"))
+            x = _encode_input(self._primary_input(sample), NUM_NODES)
+            if HEAD_TYPE == "node_classification_head":
+                y = torch.randint(0, max(2, NUM_CLASSES), (NUM_NODES,), dtype=torch.long)
+            elif HEAD_TYPE == "link_prediction_head":
+                y = torch.randint(0, 2, (NUM_NODES, NUM_NODES), dtype=torch.float32)
+            elif HEAD_TYPE == "recommendation_head":
+                y = _coerce_regression(label_val, NUM_OUTPUTS)
+            else:
+                y = _coerce_label(label_val, NUM_CLASSES)
+            return x, y
+
+        label_val = _extract_label(sample, self.spec.get("label_field"))
+        x = _encode_input(self._primary_input(sample), self.seq_len)
+        if TASK_MODE == "classification":
+            return x, _coerce_label(label_val, NUM_CLASSES)
+        if TASK_MODE == "regression":
+            return x, _coerce_regression(label_val, NUM_OUTPUTS)
+        if TASK_MODE == "language_modeling":
+            return x
+        return x, x
+
 
 def available_sample_data() -> list[str]:
     return ["auto", *sorted(SAMPLE_DATASETS.keys())]
@@ -522,6 +1473,11 @@ def load_data(
     seq_len: int = {{ blueprint.max_seq_len or 128 }},
     sample_data: str | None = None,
     sample_size: int | None = None,
+    dataset: str | None = None,
+    dataset_split: str | None = "train",
+    dataset_size: int | None = None,
+    dataset_config: str | None = None,
+    dataset_cache_dir: str | None = None,
 ):
     """
     Data loader respecting inputs: {{ spec.modality.inputs }}
@@ -530,9 +1486,12 @@ def load_data(
     Supports:
         - .bin files: Pre-tokenized binary data (uint16)
         - .txt files: Character-level tokenization
+        - remote datasets: Hugging Face datasets via --dataset
         - None: Synthetic random data
     """
     if not torch:
+        if dataset:
+            raise RuntimeError("Remote datasets require PyTorch. Install torch to proceed.")
         print("PyTorch not found, returning placeholder generator")
 
         def _gen():
@@ -541,17 +1500,36 @@ def load_data(
 
         return _gen()
 
+    selections = [bool(data_path), bool(sample_data), bool(dataset)]
+    if sum(selections) > 1:
+        raise ValueError("Choose only one of data_path, sample_data, or dataset.")
+
+    if sample_size is not None and sample_size <= 0:
+        sample_size = None
+    if dataset_size is not None and dataset_size <= 0:
+        dataset_size = None
+
     if data_path and os.path.exists(data_path) and os.path.isdir(data_path):
         print("Data path is a directory; using sample dataset instead.")
         data_path = None
 
+    if dataset:
+        spec = _resolve_remote_dataset_spec(dataset, dataset_config)
+        if spec.get("provider") != "hf":
+            raise RuntimeError(f"Unsupported dataset provider: {spec.get('provider')}")
+        remote = _load_hf_dataset(spec, dataset_split, dataset_size, dataset_cache_dir)
+        dataset_obj = RemoteDatasetAdapter(remote, spec, seq_len)
+        if dataset_size is not None:
+            dataset_obj = LimitedDataset(dataset_obj, dataset_size)
+        return DataLoader(dataset_obj, batch_size=batch_size, shuffle=True)
+
     if data_path and os.path.exists(data_path):
         if data_path.endswith(".bin"):
             print(f"Loading pre-tokenized data from {data_path}...")
-            dataset = BinaryTokenDataset(data_path, seq_len=seq_len)
+            dataset_obj = BinaryTokenDataset(data_path, seq_len=seq_len)
         else:
             print(f"Loading text data from {data_path}...")
-            dataset = FileTextDataset(data_path, seq_len=seq_len)
+            dataset_obj = FileTextDataset(data_path, seq_len=seq_len)
     else:
         chosen = sample_data or "auto"
         if chosen == "auto":
@@ -560,9 +1538,9 @@ def load_data(
             print(f"Unknown sample dataset '{chosen}', falling back to auto.")
             chosen = _auto_sample_name()
         print(f"Using sample dataset: {chosen}")
-        dataset = SAMPLE_DATASETS[chosen](seq_len)
+        dataset_obj = SAMPLE_DATASETS[chosen](seq_len)
 
     if sample_size is not None:
-        dataset = LimitedDataset(dataset, sample_size)
+        dataset_obj = LimitedDataset(dataset_obj, sample_size)
 
-    return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    return DataLoader(dataset_obj, batch_size=batch_size, shuffle=True)

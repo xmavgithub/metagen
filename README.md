@@ -55,6 +55,8 @@ git clone https://github.com/xmavgithub/metagen.git
 cd metagen
 make setup
 pip install -e .
+# Optional: training + remote datasets
+pip install -e .[torch,data]
 
 # Run the demo
 metagen demo
@@ -200,21 +202,31 @@ cd paper && make pdf
 The generated code is functional:
 
 ```bash
-# Prepare sample data
-python examples/data/prepare_shakespeare.py
-
-# Train the generated model
+# Train with a remote dataset (auto-suggested for the task)
 python outputs/<run_id>/code/train.py \
-    --data examples/data/train.bin \
+    --dataset auto \
+    --dataset-size 512 \
     --epochs 1 \
     --batch-size 4
 
-# Or use a bundled sample dataset (auto-picks one for the task)
+# Or pick a curated remote dataset explicitly
+python outputs/<run_id>/code/train.py \
+    --dataset hf:ag_news \
+    --dataset-size 512 \
+    --epochs 1 \
+    --batch-size 4
+
+# Or use a synthetic dataset (no downloads)
 python outputs/<run_id>/code/train.py \
     --sample-data auto \
     --sample-size 256 \
     --epochs 1 \
     --batch-size 4
+
+# See curated dataset names
+python outputs/<run_id>/code/train.py --list-datasets
+
+# Note: remote datasets use Hugging Face datasets and may require access approval.
 ```
 
 ---

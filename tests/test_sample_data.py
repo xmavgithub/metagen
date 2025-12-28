@@ -45,3 +45,26 @@ def test_generated_training_with_sample_data(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "Training completed" in result.stdout
+
+
+def test_generated_training_lists_remote_datasets(tmp_path: Path) -> None:
+    spec, _ = load_spec("examples/specs/text/text_classifier_bert.yaml")
+    dims = {"hidden_size": 64, "layers": 2, "heads": 2}
+    blueprint = build_blueprint_from_dims(spec, dims, seed=42)
+
+    code_dir = tmp_path / "code"
+    generate_code(spec, code_dir, blueprint, seed=42)
+
+    result = subprocess.run(
+        [sys.executable, str(code_dir / "train.py"), "--list-datasets"],
+        capture_output=True,
+        text=True,
+        cwd=code_dir,
+    )
+
+    if result.returncode != 0:
+        print("STDERR:", result.stderr)
+        print("STDOUT:", result.stdout)
+
+    assert result.returncode == 0
+    assert "Curated remote datasets" in result.stdout

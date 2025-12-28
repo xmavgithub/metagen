@@ -29,10 +29,11 @@ Synthesis and docs:
 1) Generate code:
    metagen synth <spec.yaml> --out <out_dir>
 2) Run training from the generated run folder:
+   python <out_dir>/<run_id>/code/train.py --dataset auto --dataset-size 512 --epochs 1 --batch-size 4
+3) Optional:
+   python <out_dir>/<run_id>/code/train.py --list-datasets
+   python <out_dir>/<run_id>/code/train.py --sample-data auto --sample-size 256 --epochs 1 --batch-size 4
    python <out_dir>/<run_id>/code/train.py --data <path> --epochs 1 --batch-size 4
-3) Tiny Shakespeare helper:
-   python examples/data/prepare_shakespeare.py
-   then use --data examples/data/train.bin
 
 ## Determinism
 Outputs are deterministic for the same spec content and base seed.
