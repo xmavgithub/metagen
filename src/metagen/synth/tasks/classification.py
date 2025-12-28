@@ -89,7 +89,7 @@ class ClassificationTaskHandler(TaskHandler):
         # Get num_classes from spec or use domain default
         num_classes = spec.task.num_classes
         if num_classes is None:
-            domain = spec.task.domain.lower()
+            domain = (spec.task.domain or "generic").lower()
             num_classes = DEFAULT_NUM_CLASSES.get(domain, DEFAULT_NUM_CLASSES["generic"])
             logger.debug(f"Using default num_classes={num_classes} for domain '{domain}'")
 

@@ -23,6 +23,8 @@ cd metagen
 # Create virtual environment and install
 make setup
 pip install -e .
+# Optional: training + remote datasets
+pip install -e .[torch,data]
 
 # Verify installation
 metagen --help
@@ -112,14 +114,31 @@ metagen automl examples/specs/text/text_llm_8b.yaml \
 The generated code is functional:
 
 ```bash
-# Prepare sample data
-python examples/data/prepare_shakespeare.py
-
-# Train (tiny model for demo)
+# Train with a remote dataset (auto-suggested for the task)
 python outputs/run-*/code/train.py \
-    --data examples/data/train.bin \
+    --dataset auto \
+    --dataset-size 512 \
     --epochs 1 \
     --batch-size 4
+
+# Or use a curated remote dataset explicitly
+python outputs/run-*/code/train.py \
+    --dataset hf:ag_news \
+    --dataset-size 512 \
+    --epochs 1 \
+    --batch-size 4
+
+# Or use synthetic data (no downloads)
+python outputs/run-*/code/train.py \
+    --sample-data auto \
+    --sample-size 256 \
+    --epochs 1 \
+    --batch-size 4
+
+# See curated dataset names
+python outputs/run-*/code/train.py --list-datasets
+
+# Note: remote datasets use Hugging Face datasets and may require access approval.
 ```
 
 ### Create Your Own Spec

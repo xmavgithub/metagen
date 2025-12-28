@@ -50,7 +50,9 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -92,7 +94,7 @@ class TaskComponents:
             Examples: ["accuracy", "f1"], ["mAP", "mAP_50"], ["mse", "mae"]
         template_fragments: List of template fragment paths to include.
         additional_imports: Extra Python imports needed for this task.
-        config: Additional task-specific configuration as a dict.
+        config: Additional task-specific configuration mapping.
     """
 
     head_type: str
@@ -100,7 +102,7 @@ class TaskComponents:
     metrics: tuple[str, ...] = field(default_factory=lambda: ("accuracy",))
     template_fragments: tuple[str, ...] = field(default_factory=tuple)
     additional_imports: tuple[str, ...] = field(default_factory=tuple)
-    config: dict[str, Any] = field(default_factory=dict)
+    config: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Validate and normalize components after initialization."""
@@ -110,6 +112,8 @@ class TaskComponents:
             object.__setattr__(self, "template_fragments", tuple(self.template_fragments))
         if isinstance(self.additional_imports, list):
             object.__setattr__(self, "additional_imports", tuple(self.additional_imports))
+        config = {} if self.config is None else dict(self.config)
+        object.__setattr__(self, "config", MappingProxyType(config))
 
     def with_config(self, **kwargs: Any) -> TaskComponents:
         """Create a new TaskComponents with updated config values."""
@@ -369,11 +373,13 @@ class TaskHandler(ABC):
         if not spec.modality.inputs:
             raise ValueError("Spec has no input modalities defined")
 
-        primary_input = spec.modality.inputs[0].lower()
-        if primary_input not in self.supported_modalities:
+        inputs = [modality.lower() for modality in spec.modality.inputs]
+        unsupported = [modality for modality in inputs if modality not in self.supported_modalities]
+        if unsupported:
             supported = ", ".join(self.supported_modalities)
+            unsupported_text = ", ".join(unsupported)
             raise ValueError(
-                f"Input modality '{primary_input}' is not supported by "
+                f"Input modalities '{unsupported_text}' are not supported by "
                 f"{self.name} task handler. Supported modalities: {supported}"
             )
 

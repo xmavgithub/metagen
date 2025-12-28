@@ -69,6 +69,8 @@ def demo(
     samples = [
         example_dir / "text" / "text_llm_8b.yaml",
         example_dir / "image" / "image_diffusion_sdxl_like.yaml",
+        example_dir / "image" / "image_classifier_resnet.yaml",
+        example_dir / "time_series" / "time_series_forecaster.yaml",
     ]
     for idx, spec_path in enumerate(samples, start=1):
         run_id = f"demo-{idx}"

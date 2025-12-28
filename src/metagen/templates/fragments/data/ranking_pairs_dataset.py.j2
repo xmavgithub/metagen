@@ -1,0 +1,47 @@
+# Ranking pairs dataset fragment (synthetic by default).
+try:
+    import torch
+    from torch.utils.data import DataLoader, Dataset
+except ImportError:  # pragma: no cover
+    torch = None
+    Dataset = object
+    DataLoader = object
+
+
+class SyntheticRankingPairsDataset(Dataset):
+    """Generates query/document pairs with random relevance labels."""
+
+    def __init__(
+        self,
+        size: int = 1000,
+        seq_len: int = {{ blueprint.max_seq_len or 128 }},
+        vocab_size: int = {{ blueprint.vocab_size or 50257 }},
+        seed: int = 0,
+    ) -> None:
+        self.size = size
+        self.seq_len = seq_len
+        self.vocab_size = vocab_size
+        self.seed = seed
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        if not torch:
+            raise RuntimeError("torch is required for ranking datasets.")
+        generator = torch.Generator()
+        generator.manual_seed(self.seed + idx)
+        query = torch.randint(0, self.vocab_size, (self.seq_len,), generator=generator)
+        document = torch.randint(0, self.vocab_size, (self.seq_len,), generator=generator)
+        label = torch.randint(0, 2, (1,), generator=generator).float()
+        return {"query": query, "document": document, "label": label}
+
+
+def build_ranking_pairs_dataloader(
+    batch_size: int = 4,
+    shuffle: bool = True,
+) -> DataLoader:
+    if not torch or DataLoader is object:
+        raise RuntimeError("torch is required for ranking data loaders.")
+    dataset = SyntheticRankingPairsDataset()
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

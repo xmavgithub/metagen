@@ -198,6 +198,34 @@ metagen schema
 
 **Options:** None
 
+---
+
+## Generated Training Script
+
+Every synthesis emits `code/train.py` with a small CLI for quick experiments.
+
+**Options:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--dataset` | TEXT | none | Curated remote dataset name or `hf:<path>` |
+| `--list-datasets` | FLAG | off | List curated remote datasets |
+| `--dataset-split` | TEXT | `train` | Remote dataset split |
+| `--dataset-size` | INTEGER | `1024` | Max remote samples (0 = full split) |
+| `--dataset-config` | TEXT | none | Optional Hugging Face dataset config |
+| `--dataset-cache-dir` | PATH | none | Optional cache directory for datasets |
+| `--sample-data` | TEXT | none | Synthetic dataset name (`auto`, `synthetic_*`) |
+| `--sample-size` | INTEGER | `256` | Max synthetic samples |
+| `--data` | PATH | none | Local `.txt`/`.bin` path |
+
+**Examples:**
+
+```bash
+python outputs/run-*/code/train.py --dataset auto --dataset-size 512 --epochs 1
+python outputs/run-*/code/train.py --sample-data auto --sample-size 256 --epochs 1
+python outputs/run-*/code/train.py --data /path/to/data.bin --epochs 1
+```
+
 **Output:**
 JSON schema to stdout. Pipe to file or jq for formatting:
 

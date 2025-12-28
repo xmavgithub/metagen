@@ -58,13 +58,56 @@ def _train_step(model, optimizer, batch, device):
 def main() -> int:
     parser = argparse.ArgumentParser(description="Benchmark batch size throughput.")
     parser.add_argument("--run-dir", type=str, default=None, help="Run directory (contains code/).")
-    parser.add_argument("--data", type=str, default="examples/data/train.bin", help="Path to data.")
+    parser.add_argument("--data", type=str, default=None, help="Path to local data (.bin or .txt).")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default=None,
+        help="Remote dataset name (from --list-datasets or hf:<path>).",
+    )
+    parser.add_argument("--dataset-split", type=str, default="train", help="Remote dataset split.")
+    parser.add_argument(
+        "--dataset-size",
+        type=int,
+        default=1024,
+        help="Max samples for remote datasets (0 = full split).",
+    )
+    parser.add_argument(
+        "--dataset-config",
+        type=str,
+        default=None,
+        help="Optional dataset config (Hugging Face).",
+    )
+    parser.add_argument(
+        "--dataset-cache-dir",
+        type=str,
+        default=None,
+        help="Optional cache directory for remote datasets.",
+    )
+    parser.add_argument(
+        "--sample-data",
+        type=str,
+        default=None,
+        help="Synthetic dataset name (auto, synthetic_*).",
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=256,
+        help="Max samples for synthetic datasets.",
+    )
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[8, 16, 32])
     parser.add_argument("--steps", type=int, default=100, help="Timed steps per batch size.")
     parser.add_argument("--warmup", type=int, default=10, help="Warmup steps per batch size.")
     parser.add_argument("--device", type=str, default=None, help="cuda/mps/cpu (auto if omitted).")
     parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate.")
     args = parser.parse_args()
+    selections = [bool(args.data), bool(args.dataset), bool(args.sample_data)]
+    if sum(selections) > 1:
+        print("Error: choose only one of --data, --dataset, or --sample-data.")
+        return 2
+    if not args.data and not args.dataset and not args.sample_data:
+        args.sample_data = "auto"
 
     run_dir = Path(args.run_dir) if args.run_dir else _find_latest_run()
     if not run_dir:
@@ -95,7 +138,25 @@ def main() -> int:
     print(f"Device: {device}")
 
     for batch_size in args.batch_sizes:
-        loader = load_data(data_path=args.data, batch_size=batch_size)
+        if args.dataset:
+            dataset_size = None if args.dataset_size == 0 else args.dataset_size
+            loader = load_data(
+                data_path=args.data,
+                batch_size=batch_size,
+                dataset=args.dataset,
+                dataset_split=args.dataset_split,
+                dataset_size=dataset_size,
+                dataset_config=args.dataset_config,
+                dataset_cache_dir=args.dataset_cache_dir,
+            )
+        else:
+            sample_size = args.sample_size if args.sample_data else None
+            loader = load_data(
+                data_path=args.data,
+                batch_size=batch_size,
+                sample_data=args.sample_data,
+                sample_size=sample_size,
+            )
         if not hasattr(loader, "__len__"):
             print("Error: Data loader is not a DataLoader. Aborting.")
             return 1

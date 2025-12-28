@@ -13,7 +13,7 @@ class LinkPredictionHead(nn.Module):
     ) -> None:
         super().__init__()
         self.output_dim = output_dim
-        self.proj = nn.Linear(hidden_dim, hidden_dim)
+        self.proj = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

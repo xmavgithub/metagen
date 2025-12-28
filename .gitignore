@@ -66,6 +66,8 @@ db.sqlite3-journal
 
 # MetaGen local history
 .metagen/
+.hf_cache/
+.mplcache/
 
 # Flask stuff:
 instance/

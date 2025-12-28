@@ -181,7 +181,7 @@ class GraphClassificationTaskHandler(TaskHandler):
 
 @register_task("link_prediction")
 class LinkPredictionTaskHandler(TaskHandler):
-    """Task handler for link prediction."""
+    """Task handler for link prediction (assumes undirected graphs)."""
 
     @property
     def name(self) -> str:
@@ -201,6 +201,7 @@ class LinkPredictionTaskHandler(TaskHandler):
         blueprint: BlueprintState,
         seed: int,
     ) -> BlueprintState:
+        logger.debug("Link prediction assumes undirected graphs for symmetric scores.")
         node_features, edge_features = _resolve_graph_features(spec)
         num_outputs = spec.task.num_outputs or 1
         return replace(
