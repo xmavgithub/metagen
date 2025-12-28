@@ -7,8 +7,8 @@ from jinja2 import Environment, FileSystemLoader
 
 from metagen.specs.schema import ModelSpec
 from metagen.synth.architecture import BlueprintState
-from metagen.synth.tasks import get_task_handler
 from metagen.utils.io import ensure_dir, write_text
+from metagen.synth.tasks import get_task_handler
 
 # Setup Jinja2 environment
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
