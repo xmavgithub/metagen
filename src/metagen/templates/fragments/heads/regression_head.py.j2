@@ -1,0 +1,37 @@
+# Regression head fragment.
+import torch
+import torch.nn as nn
+
+
+class RegressionHead(nn.Module):
+    """Regression head for continuous value prediction tasks."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        num_outputs: int = {{ blueprint.num_outputs or 1 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        self.batch_norm = nn.BatchNorm1d(hidden_dim)
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim // 2)
+        self.fc2 = nn.Linear(hidden_dim // 2, num_outputs)
+        self.activation = nn.ReLU()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim) for pooled representations.
+
+        Returns:
+            Predictions of shape (batch_size, num_outputs).
+        """
+        # If sequence, pool
+        if x.dim() == 3:
+            x = x.mean(dim=1)  # Global average pooling
+        x = self.batch_norm(x)
+        x = self.dropout(x)
+        x = self.activation(self.fc1(x))
+        return self.fc2(x)

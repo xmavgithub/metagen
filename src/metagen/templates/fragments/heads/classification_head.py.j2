@@ -1,0 +1,34 @@
+# Classification head fragment.
+import torch
+import torch.nn as nn
+
+
+class ClassificationHead(nn.Module):
+    """Classification head for multi-class classification tasks."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        num_classes: int = {{ blueprint.num_classes or 1000 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        self.layer_norm = nn.LayerNorm(hidden_dim)
+        self.classifier = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim) for pooled representations.
+
+        Returns:
+            Logits of shape (batch_size, num_classes).
+        """
+        # If sequence, take CLS token or pool
+        if x.dim() == 3:
+            x = x[:, 0]  # Take [CLS] token
+        x = self.layer_norm(x)
+        x = self.dropout(x)
+        return self.classifier(x)
