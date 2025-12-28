@@ -480,11 +480,13 @@ src/metagen/
 - [x] Create task registry
 - [x] Add BlueprintState fields for task-specific params
 
-### Phase 2: Classification (1 day)
-- [ ] Implement ClassificationTaskHandler
-- [ ] Add classification_head.py.j2 template
-- [ ] Add example specs
-- [ ] Add tests
+### Phase 2: Classification & Regression (1 day) ✅ COMPLETED
+- [x] Implement ClassificationTaskHandler
+- [x] Implement RegressionTaskHandler
+- [x] Implement EmbeddingTaskHandler
+- [x] Implement RankingTaskHandler
+- [x] Add example specs (5 new specs)
+- [x] Add tests (43 new tests)
 
 ### Phase 3: Detection & Segmentation (2-3 days)
 - [ ] Implement DetectionTaskHandler

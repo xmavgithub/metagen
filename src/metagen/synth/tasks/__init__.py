@@ -60,6 +60,12 @@ Created: 2025-12-28
 """
 
 from metagen.synth.tasks.base import TaskComponents, TaskHandler
+
+# Phase 2: Classification & Regression handlers
+# Import to register handlers with the registry
+from metagen.synth.tasks.classification import ClassificationTaskHandler
+from metagen.synth.tasks.embedding import EmbeddingTaskHandler
+from metagen.synth.tasks.ranking import RankingTaskHandler
 from metagen.synth.tasks.registry import (
     clear_task_handler_cache,
     get_task_handler,
@@ -68,10 +74,7 @@ from metagen.synth.tasks.registry import (
     list_registered_task_types,
     register_task,
 )
-
-# Note: Task handler implementations will be imported here as they are added
-# in subsequent phases. For Phase 1 Foundation, only the base infrastructure
-# is provided.
+from metagen.synth.tasks.regression import RegressionTaskHandler
 
 __all__ = [
     # Base classes
@@ -84,4 +87,9 @@ __all__ = [
     "list_registered_task_types",
     "is_generative_task",
     "clear_task_handler_cache",
+    # Phase 2 handlers
+    "ClassificationTaskHandler",
+    "RegressionTaskHandler",
+    "EmbeddingTaskHandler",
+    "RankingTaskHandler",
 ]
