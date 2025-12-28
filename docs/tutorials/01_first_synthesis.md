@@ -15,14 +15,19 @@ MetaGen includes several example specifications:
 ls examples/specs/
 ```
 
-You'll see specs for different modalities and architectures.
+You'll see folders for different domains (text, image, audio, time_series, graph, rl).
+Browse `docs/reference/specs.md` for a full index, or drill into a folder:
+
+```bash
+ls examples/specs/text/
+```
 
 ## Step 2: Examine a Spec
 
 Let's look at a text LLM specification:
 
 ```bash
-cat examples/specs/text_llm_8b.yaml
+cat examples/specs/text/text_llm_8b.yaml
 ```
 
 Key sections:
@@ -36,7 +41,7 @@ Key sections:
 Generate a complete release package:
 
 ```bash
-metagen synth examples/specs/text_llm_8b.yaml --out my_first_run/
+metagen synth examples/specs/text/text_llm_8b.yaml --out my_first_run/
 ```
 
 You'll see a summary table with:
@@ -106,7 +111,7 @@ This generates a publication-ready PDF.
 Run synthesis again with the same seed:
 
 ```bash
-metagen synth examples/specs/text_llm_8b.yaml --out second_run/ --seed 42
+metagen synth examples/specs/text/text_llm_8b.yaml --out second_run/ --seed 42
 ```
 
 Compare outputs:

@@ -9,7 +9,7 @@ from metagen.synth.codegen import generate_code
 def test_generated_training_loop_runs(tmp_path: Path):
     """Verify generated train.py runs successfully."""
     # Generate code
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     # Use smaller model for fast test
     spec.architecture.family = "transformer"
     # Manually construct a tiny blueprint for speed (CPU friendly)

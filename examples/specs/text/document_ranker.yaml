@@ -1,0 +1,57 @@
+# MetaGen Spec: Document Ranking Model
+#
+# This specification defines a cross-encoder for document ranking.
+# Uses the new task-based handler system for ranking tasks.
+#
+# Key Parameters:
+#   - Architecture: Transformer encoder
+#   - Output: Relevance score
+#   - Parameter count: ~110M
+#
+# Example Usage:
+#   metagen synth examples/specs/text/document_ranker.yaml --out outputs/doc_ranker/
+
+metagen_version: "1.0"
+name: "Cross-Encoder Document Ranker"
+
+modality:
+  inputs:
+    - text
+  outputs:
+    - regression
+
+task:
+  type: ranking
+  domain: search
+
+constraints:
+  device: consumer_gpu
+  latency: near-real-time
+  parameter_budget:
+    max: "120M"
+  context_window: "512"
+
+architecture:
+  family: transformer
+
+training:
+  objective:
+    - pairwise_ranking
+  data:
+    sources:
+      - ms_marco
+      - natural_questions
+    size: "500K query-document pairs"
+  compute:
+    hardware: "4xA100"
+    duration: "8 hours"
+
+evaluation:
+  benchmarks:
+    - ms_marco_dev
+    - trec_dl_2019
+  metrics:
+    - ndcg_at_10
+    - mrr
+    - map
+    - precision_at_1

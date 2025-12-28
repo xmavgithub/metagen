@@ -8,7 +8,7 @@ from metagen.synth.codegen import generate_code
 
 def test_data_generation_validity(tmp_path: Path):
     """Verify generated data.py is valid python and classes exist."""
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     blueprint = generate_blueprint(spec, tmp_path / "bp", seed=42)
     generate_code(spec, tmp_path / "code", blueprint, seed=42)
 

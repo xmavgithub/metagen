@@ -1,0 +1,31 @@
+# Recommendation head fragment.
+import torch
+import torch.nn as nn
+
+
+class RecommendationHead(nn.Module):
+    """Recommendation head for user-item scoring."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        output_dim: int = {{ blueprint.num_outputs or 1 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        self.scorer = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Embeddings of shape (batch_size, hidden_dim)
+               or (batch_size, seq_len, hidden_dim).
+
+        Returns:
+            Scores of shape (batch_size, output_dim).
+        """
+        if x.dim() == 3:
+            x = x.mean(dim=1)
+        x = self.dropout(x)
+        return self.scorer(x)

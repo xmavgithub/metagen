@@ -20,9 +20,9 @@ Tests and lint:
 
 Synthesis and docs:
 - metagen demo
-- metagen synth examples/specs/text_llm_8b.yaml --out outputs
-- metagen paper examples/specs/text_llm_8b.yaml --out paper
-- metagen validate examples/specs/text_llm_8b.yaml
+- metagen synth examples/specs/text/text_llm_8b.yaml --out outputs
+- metagen paper examples/specs/text/text_llm_8b.yaml --out paper
+- metagen validate examples/specs/text/text_llm_8b.yaml
 - metagen schema
 
 ## Trainable Code Path

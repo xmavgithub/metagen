@@ -61,8 +61,11 @@ This synthesizes release packages for several example specs and displays a summa
 Generate a complete release package:
 
 ```bash
-metagen synth examples/specs/text_llm_8b.yaml --out outputs/
+metagen synth examples/specs/text/text_llm_8b.yaml --out outputs/
 ```
+
+Example specs are organized by domain under `examples/specs/`. See
+`docs/reference/specs.md` for the full index and paths.
 
 ### 3. Explore the Output
 
@@ -82,7 +85,7 @@ You'll find:
 Create a publication-ready LaTeX project:
 
 ```bash
-metagen paper examples/specs/text_llm_8b.yaml --out paper/
+metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
 
 # Build PDF (requires LaTeX)
 cd paper && make pdf
@@ -96,10 +99,10 @@ Find optimal architectures with AutoML:
 
 ```bash
 # Quick random search
-metagen automl examples/specs/text_llm_8b.yaml --search-budget 20
+metagen automl examples/specs/text/text_llm_8b.yaml --search-budget 20
 
 # Evolutionary search (better results)
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --strategy evolution \
     --generations 5
 ```
@@ -185,3 +188,4 @@ python --version
 - [AutoML Guide](automl_guide.md) - Architecture search
 - [Multi-Modal Guide](multi_modal.md) - Working with different modalities
 - [CLI Reference](../reference/cli.md) - All commands and options
+- [Example Specs Index](../reference/specs.md) - Curated spec list

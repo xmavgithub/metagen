@@ -1,0 +1,49 @@
+# MetaGen Spec: Graph Attention Network Classifier
+#
+# Graph-level classification for molecular property prediction.
+#
+# Example Usage:
+#   metagen synth examples/specs/graph/graph_classifier_gat.yaml --out outputs/gat/
+
+metagen_version: "1.0"
+name: "GAT Molecule Classifier"
+
+modality:
+  inputs:
+    - graph
+  outputs:
+    - label
+
+task:
+  type: graph_classification
+  domain: chemistry
+  num_classes: 2
+  node_features: 64
+  edge_features: 16
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "2M"
+
+architecture:
+  family: gnn
+
+training:
+  objective:
+    - classification
+  data:
+    sources:
+      - molecules
+    size: "100k graphs"
+  compute:
+    hardware: "1xA100"
+    duration: "6 hours"
+
+evaluation:
+  benchmarks:
+    - roc_auc
+  metrics:
+    - accuracy
+    - roc_auc

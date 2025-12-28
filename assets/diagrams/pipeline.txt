@@ -20,10 +20,10 @@ MetaGen Pipeline Architecture
                                       │
                                       ▼
                     ┌─────────────────────────────────────┐
-                    │        Modality Handler             │
-                    │  • Text, Image, Audio, Video        │
-                    │  • Select architecture components   │
-                    │  • Configure embeddings/encoders    │
+                    │      Modality + Task Handler        │
+                    │  • Route by modality + task         │
+                    │  • Text, image, audio, video, graph │
+                    │  • Heads, losses, data loaders      │
                     └─────────────────┬───────────────────┘
                                       │
           ┌───────────────────────────┼───────────────────────────┐
@@ -68,6 +68,7 @@ Key Properties
 ==============
 
 • Deterministic: Same spec + seed = identical outputs
-• Multi-modal: Text, Image, Audio, Video, 3D
-• Extensible: Modality handlers, architecture families
+• Multi-modal: Text, Image, Audio, Video, 3D, Time Series, Graph
+• Task-aware: Classification, detection, segmentation, RL
+• Extensible: Modality handlers, task handlers, architecture families
 • Complete: Code, docs, benchmarks, paper in one run

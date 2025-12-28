@@ -45,7 +45,7 @@ from metagen.synth.paper_templates import (
 @pytest.fixture
 def spec():
     """Load a test spec."""
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     return spec
 
 

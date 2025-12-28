@@ -112,7 +112,7 @@ class ExperimentRunner:
     Example:
         >>> runner = ExperimentRunner(output_dir=Path("experiments/"))
         >>> suite = runner.run_suite(
-        ...     spec_paths=["examples/specs/text_llm_8b.yaml"],
+        ...     spec_paths=["examples/specs/text/text_llm_8b.yaml"],
         ...     baselines=["gpt2", "random_search", "metagen"],
         ...     num_runs=3,
         ...     seed=42,
@@ -248,7 +248,7 @@ def run_experiment(
         ExperimentSuite with results.
 
     Example:
-        >>> suite = run_experiment("examples/specs/text_llm_8b.yaml")
+        >>> suite = run_experiment("examples/specs/text/text_llm_8b.yaml")
         >>> print(suite.generate_comparison_table())
     """
     runner = ExperimentRunner(output_dir=output_dir)

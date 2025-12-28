@@ -1,0 +1,55 @@
+# MetaGen Spec: Tabular Regression Model
+#
+# This specification defines an MLP model for house price prediction.
+# Uses the new task-based handler system for regression tasks.
+#
+# Key Parameters:
+#   - Architecture: MLP
+#   - Number of outputs: 1 (price prediction)
+#   - Parameter count: ~1M
+#
+# Example Usage:
+#   metagen synth examples/specs/tabular/tabular_regressor.yaml --out outputs/house_price/
+
+metagen_version: "1.0"
+name: "House Price Predictor"
+
+modality:
+  inputs:
+    - tabular
+  outputs:
+    - regression
+
+task:
+  type: regression
+  domain: finance
+  num_outputs: 1
+
+constraints:
+  device: cpu
+  latency: real-time
+  parameter_budget:
+    max: "1M"
+
+architecture:
+  family: mlp
+
+training:
+  objective:
+    - regression
+  data:
+    sources:
+      - kaggle_house_prices
+    size: "50K samples"
+  compute:
+    hardware: "1xV100"
+    duration: "30 minutes"
+
+evaluation:
+  benchmarks:
+    - house_prices_kaggle
+  metrics:
+    - mse
+    - rmse
+    - mae
+    - r2_score

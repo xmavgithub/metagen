@@ -1,0 +1,39 @@
+# RL value/Q head fragment.
+import torch
+import torch.nn as nn
+
+
+class RLValueHead(nn.Module):
+    """Value head for Q-value or state value prediction."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        action_space: str = "{{ blueprint.action_space or 'discrete' }}",
+        num_actions: int | None = {{ blueprint.num_actions or 0 }},
+        action_dim: int | None = {{ blueprint.action_dim or 0 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.action_space = action_space
+        self.dropout = nn.Dropout(dropout)
+
+        if action_space == "continuous":
+            dim = action_dim or 1
+        else:
+            dim = num_actions or 1
+        self.value = nn.Linear(hidden_dim, dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            Q-values or value estimates of shape (batch_size, dim).
+        """
+        if x.dim() == 3:
+            x = x[:, -1]
+        x = self.dropout(x)
+        return self.value(x)

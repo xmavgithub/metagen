@@ -1,0 +1,35 @@
+# Time series head fragment.
+import torch
+import torch.nn as nn
+
+
+class TimeSeriesHead(nn.Module):
+    """Head for time series forecasting or reconstruction."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        horizon: int = {{ blueprint.horizon or 1 }},
+        output_dim: int = {{ blueprint.num_outputs or 1 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.horizon = horizon
+        self.output_dim = output_dim
+        self.dropout = nn.Dropout(dropout)
+        self.proj = nn.Linear(hidden_dim, horizon * output_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            Predictions of shape (batch_size, horizon, output_dim).
+        """
+        if x.dim() == 3:
+            x = x[:, -1]
+        x = self.dropout(x)
+        x = self.proj(x)
+        return x.view(x.size(0), self.horizon, self.output_dim)

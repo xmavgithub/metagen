@@ -48,13 +48,28 @@ modality:
   outputs: ["text"]
 ```
 
-**Supported modalities:**
+**Supported input types:**
 - `text` - Natural language
 - `image` - Static images
 - `audio` - Audio/speech
 - `video` - Video sequences
-- `3d` - 3D meshes/point clouds
+- `3d` - 3D meshes
 - `multimodal` - Combined modalities
+- `time_series` - Temporal sequences
+- `graph` - Graph/network data
+- `tabular` - Structured/tabular data
+- `point_cloud` - 3D point clouds
+
+**Supported output types:**
+- `text`, `image`, `audio`, `video`, `3d`, `multimodal`
+- `label` - Classification output
+- `bounding_boxes` - Object detection
+- `segmentation_mask` - Segmentation
+- `embedding` - Vector representation
+- `action` - RL action output
+- `time_series` - Temporal prediction
+- `graph` - Graph output
+- `regression` - Numeric prediction
 
 **Unsupported modalities** (trigger warnings):
 - `taste`, `smell`, `vibes`
@@ -68,10 +83,12 @@ task:
 ```
 
 **Task types:**
-- `generation` - Content generation
-- `classification` - Categorization
-- `retrieval` - Search/matching
-- `translation` - Cross-modal/language conversion
+- **Core**: `generation`
+- **Classification/Regression**: `classification`, `regression`, `embedding`, `ranking`
+- **Detection/Segmentation**: `object_detection`, `instance_segmentation`, `semantic_segmentation`, `panoptic_segmentation`
+- **Time Series**: `time_series_forecast`, `anomaly_detection`, `sequence_labeling`, `speech_recognition`
+- **Reinforcement Learning**: `policy_gradient`, `value_based`, `actor_critic`, `model_based`
+- **Graph**: `node_classification`, `link_prediction`, `graph_classification`, `recommendation`
 
 ### Constraints
 
@@ -114,11 +131,14 @@ training:
     policy: "helpful-harmless-ish"
 ```
 
-**Training objectives:**
+**Training objectives (common):**
 - `autoregressive` - Next-token prediction (GPT-style)
 - `diffusion` - Denoising diffusion (Stable Diffusion-style)
 - `contrastive` - Contrastive learning (CLIP-style)
 - `masked` - Masked language modeling (BERT-style)
+- `classification`, `regression`, `ranking`
+- `object_detection`, `segmentation`, `reconstruction`
+- `policy_gradient`, `value_based`, `actor_critic`, `model_based`
 
 ### Architecture
 
@@ -137,6 +157,8 @@ architecture:
 - `diffusion` - U-Net based diffusion models
 - `cnn` - Convolutional neural networks
 - `hybrid` - Combined architectures
+- `mlp` - Feed-forward networks
+- `gnn` - Graph neural networks
 
 ### Outputs
 
@@ -204,6 +226,8 @@ MetaGen handles edge cases gracefully:
 
 ## Example Specs
 
+For a curated list of bundled specs, see `docs/reference/specs.md`.
+
 ### Minimal Text Model
 
 ```yaml
@@ -263,3 +287,4 @@ architecture:
 - [Quick Start Guide](quickstart.md) - Getting started
 - [AutoML Guide](automl_guide.md) - Architecture search
 - [Multi-Modal Guide](multi_modal.md) - Working with different modalities
+- [Example Specs Index](../reference/specs.md) - Curated spec list

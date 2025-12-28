@@ -1,0 +1,47 @@
+# Time series dataset fragment (synthetic by default).
+try:
+    import torch
+    from torch.utils.data import DataLoader, Dataset
+except ImportError:  # pragma: no cover
+    torch = None
+    Dataset = object
+    DataLoader = object
+
+
+class SyntheticTimeSeriesDataset(Dataset):
+    """Generates random time series windows for prototyping."""
+
+    def __init__(
+        self,
+        size: int = 1000,
+        lookback: int = {{ blueprint.lookback or 30 }},
+        horizon: int = {{ blueprint.horizon or 1 }},
+        output_dim: int = {{ blueprint.num_outputs or 1 }},
+    ) -> None:
+        self.size = size
+        self.lookback = lookback
+        self.horizon = horizon
+        self.output_dim = output_dim
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        if not torch:
+            return [], []
+        series = torch.randn(self.lookback + self.horizon, self.output_dim)
+        x = series[: self.lookback]
+        y = series[self.lookback :]
+        return x, y
+
+
+def build_time_series_dataloader(
+    batch_size: int = 8,
+    shuffle: bool = True,
+) -> DataLoader:
+    if torch is None:
+        raise RuntimeError(
+            "torch is required for time series datasets; install via pip or conda."
+        )
+    dataset = SyntheticTimeSeriesDataset()
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

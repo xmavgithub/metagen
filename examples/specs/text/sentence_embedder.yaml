@@ -1,0 +1,58 @@
+# MetaGen Spec: Sentence Embedding Model
+#
+# This specification defines a sentence transformer for text embeddings.
+# Uses the new task-based handler system for embedding tasks.
+#
+# Key Parameters:
+#   - Architecture: Transformer encoder
+#   - Embedding dimension: 768
+#   - Parameter count: ~110M
+#
+# Example Usage:
+#   metagen synth examples/specs/text/sentence_embedder.yaml --out outputs/sentence_embedder/
+
+metagen_version: "1.0"
+name: "Sentence Transformer Embedder"
+
+modality:
+  inputs:
+    - text
+  outputs:
+    - embedding
+
+task:
+  type: embedding
+  domain: text
+  embedding_dim: 768
+
+constraints:
+  device: consumer_gpu
+  latency: near-real-time
+  parameter_budget:
+    max: "120M"
+  context_window: "512"
+
+architecture:
+  family: transformer
+
+training:
+  objective:
+    - contrastive
+  data:
+    sources:
+      - nli_pairs
+      - paraphrase_mining
+    size: "1M sentence pairs"
+  compute:
+    hardware: "4xA100"
+    duration: "12 hours"
+
+evaluation:
+  benchmarks:
+    - sts_benchmark
+    - sentence_embedding_benchmark
+  metrics:
+    - recall_at_1
+    - recall_at_5
+    - mrr
+    - cosine_similarity

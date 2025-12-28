@@ -14,5 +14,5 @@ demo:
 	metagen demo
 
 paper:
-	metagen paper examples/specs/text_llm_8b.yaml --out paper
+	metagen paper examples/specs/text/text_llm_8b.yaml --out paper
 	make -C paper pdf

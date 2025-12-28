@@ -45,14 +45,14 @@ from metagen.specs.loader import load_spec
 @pytest.fixture
 def sample_spec():
     """Load a sample spec for testing."""
-    spec, _ = load_spec(Path("examples/specs/text_llm_8b.yaml"))
+    spec, _ = load_spec(Path("examples/specs/text/text_llm_8b.yaml"))
     return spec
 
 
 @pytest.fixture
 def image_spec():
     """Load an image spec for testing."""
-    spec, _ = load_spec(Path("examples/specs/image_diffusion_sdxl_like.yaml"))
+    spec, _ = load_spec(Path("examples/specs/image/image_diffusion_sdxl_like.yaml"))
     return spec
 
 
@@ -437,7 +437,7 @@ class TestExperimentRunner:
         """Test running experiment suite."""
         runner = ExperimentRunner()
         suite = runner.run_suite(
-            spec_paths=["examples/specs/text_llm_8b.yaml"],
+            spec_paths=["examples/specs/text/text_llm_8b.yaml"],
             baselines=["gpt2", "random_search"],
             num_runs=2,
             seed=42,
@@ -451,7 +451,7 @@ class TestExperimentRunner:
         with tempfile.TemporaryDirectory() as tmpdir:
             runner = ExperimentRunner(output_dir=Path(tmpdir))
             _suite = runner.run_suite(
-                spec_paths=["examples/specs/text_llm_8b.yaml"],
+                spec_paths=["examples/specs/text/text_llm_8b.yaml"],
                 baselines=["gpt2"],
                 num_runs=1,
                 seed=42,
@@ -468,7 +468,7 @@ class TestRunExperiment:
     def test_run_experiment(self):
         """Test running experiment on single spec."""
         suite = run_experiment(
-            "examples/specs/text_llm_8b.yaml",
+            "examples/specs/text/text_llm_8b.yaml",
             baselines=["gpt2", "metagen"],
             seed=42,
         )
@@ -621,7 +621,7 @@ class TestExperimentsIntegration:
             # Run experiments
             runner = ExperimentRunner(output_dir=Path(tmpdir))
             suite = runner.run_suite(
-                spec_paths=["examples/specs/text_llm_8b.yaml"],
+                spec_paths=["examples/specs/text/text_llm_8b.yaml"],
                 baselines=["gpt2", "random_search", "metagen"],
                 num_runs=2,
                 seed=42,
@@ -639,7 +639,7 @@ class TestExperimentsIntegration:
         """Test ablation study integration."""
         # First run experiment to get base score
         suite = run_experiment(
-            "examples/specs/text_llm_8b.yaml",
+            "examples/specs/text/text_llm_8b.yaml",
             baselines=["metagen"],
             seed=42,
         )

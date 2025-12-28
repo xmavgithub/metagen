@@ -1,0 +1,58 @@
+# MetaGen Spec: Time Series Forecaster
+#
+# Temporal forecasting model for financial time series.
+#
+# Key Parameters:
+#   - Lookback window: 90 steps
+#   - Forecast horizon: 30 steps
+#   - Output dimension: 1
+#
+# Example Usage:
+#   metagen synth examples/specs/time_series/time_series_forecaster.yaml --out outputs/ts_forecaster/
+
+metagen_version: "1.0"
+name: "Stock Price Forecaster"
+
+modality:
+  inputs:
+    - time_series
+  outputs:
+    - time_series
+
+task:
+  type: time_series_forecast
+  domain: finance
+  lookback: 90
+  horizon: 30
+  num_outputs: 1
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "12M"
+
+architecture:
+  family: transformer
+
+training:
+  objective:
+    - forecasting
+  data:
+    sources:
+      - synthetic
+      - finance
+    size: "5M rows"
+  compute:
+    hardware: "4xA100"
+    duration: "8 hours"
+
+evaluation:
+  benchmarks:
+    - mae
+    - rmse
+  metrics:
+    - mse
+    - rmse
+    - mape
+    - smape

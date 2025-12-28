@@ -1,0 +1,31 @@
+# Node classification head fragment.
+import torch
+import torch.nn as nn
+
+
+class NodeClassificationHead(nn.Module):
+    """Node-level classification head."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        num_classes: int = {{ blueprint.num_classes or 2 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        self.classifier = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Node embeddings of shape (batch_size, num_nodes, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            Node logits of shape (batch_size, num_nodes, num_classes).
+        """
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
+        x = self.dropout(x)
+        return self.classifier(x)

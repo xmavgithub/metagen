@@ -36,6 +36,31 @@ class BlueprintState:
     patch_size: int | None = None  # ViT: patch size (16, 32, etc.)
     num_patches: int | None = None  # ViT: total patch count
 
+    # Task-specific parameters (Phase 1: Extended Model Types)
+    # Classification/Regression
+    num_classes: int | None = None  # Classification: number of output classes
+    num_outputs: int | None = None  # Regression: number of output values
+
+    # Time Series
+    horizon: int | None = None  # Time series: prediction horizon
+    lookback: int | None = None  # Time series: historical window size
+
+    # Reinforcement Learning
+    num_actions: int | None = None  # RL: number of discrete actions
+    action_dim: int | None = None  # RL: continuous action space dimension
+    action_space: str | None = None  # RL: "discrete" or "continuous"
+
+    # Detection/Segmentation
+    num_anchors: int | None = None  # Detection: number of anchor boxes
+    mask_resolution: int | None = None  # Segmentation: output mask resolution
+
+    # Graph Neural Networks
+    node_features: int | None = None  # GNN: node feature dimension
+    edge_features: int | None = None  # GNN: edge feature dimension
+
+    # Embedding
+    embedding_dim: int | None = None  # Embedding: output vector dimension
+
     # Architecture metadata
     family: str = "transformer"  # Architecture family from spec
     components: tuple = field(default_factory=tuple)  # Component list (immutable)
@@ -48,6 +73,9 @@ class BlueprintState:
 
     # Seed and determinism
     seed: int = 42  # Random seed used for generation
+
+    # Task type (for downstream code generation)
+    task_type: str = "generation"  # Task type from spec
 
 
 def _choose_dims(spec: ModelSpec) -> dict[str, int]:
@@ -210,6 +238,7 @@ def _build_blueprint_state(spec: ModelSpec, dims: dict[str, int], seed: int) -> 
         activation_memory_gb=memory_gb,
         kv_cache_gb=kv_cache,
         seed=seed,
+        task_type=spec.task.type.lower(),
     )
 
     return _augment_blueprint_with_handler(spec, blueprint, seed)

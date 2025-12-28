@@ -1,0 +1,56 @@
+# MetaGen Spec: ResNet-50 Image Classifier
+#
+# This specification defines a ResNet-50 model for ImageNet classification.
+# Uses the new task-based handler system for classification tasks.
+#
+# Key Parameters:
+#   - Image size: 224x224
+#   - Architecture: ResNet-50 (CNN)
+#   - Number of classes: 1000 (ImageNet)
+#   - Parameter count: ~25M
+#
+# Example Usage:
+#   metagen synth examples/specs/image/image_classifier_resnet.yaml --out outputs/resnet50/
+
+metagen_version: "1.0"
+name: "ResNet-50 ImageNet Classifier"
+
+modality:
+  inputs:
+    - image
+  outputs:
+    - label
+
+task:
+  type: classification
+  domain: imagenet
+  num_classes: 1000
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "30M"
+
+architecture:
+  family: cnn
+
+training:
+  objective:
+    - classification
+  data:
+    sources:
+      - imagenet
+    size: "1.28M samples"
+  compute:
+    hardware: "8xA100"
+    duration: "1 day"
+
+evaluation:
+  benchmarks:
+    - imagenet_1k_top1
+    - imagenet_1k_top5
+  metrics:
+    - accuracy
+    - top5_accuracy
+    - f1_macro

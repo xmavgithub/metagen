@@ -1,0 +1,43 @@
+# RL actor-critic head fragment.
+import torch
+import torch.nn as nn
+
+
+class RLActorCriticHead(nn.Module):
+    """Actor-critic head returning policy outputs and value estimates."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        action_space: str = "{{ blueprint.action_space or 'discrete' }}",
+        num_actions: int | None = {{ blueprint.num_actions or 0 }},
+        action_dim: int | None = {{ blueprint.action_dim or 0 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.action_space = action_space
+        self.dropout = nn.Dropout(dropout)
+
+        if action_space == "continuous":
+            policy_dim = action_dim or 1
+            self.log_std = nn.Parameter(torch.zeros(policy_dim))
+        else:
+            policy_dim = num_actions or 1
+            self.log_std = None
+
+        self.policy = nn.Linear(hidden_dim, policy_dim)
+        self.value = nn.Linear(hidden_dim, 1)
+
+    def forward(self, x: torch.Tensor):
+        """
+        Returns:
+            Tuple of (policy_output, value).
+        """
+        if x.dim() == 3:
+            x = x[:, -1]
+        x = self.dropout(x)
+        policy_out = self.policy(x)
+        value = self.value(x)
+        if self.action_space == "continuous":
+            return policy_out, self.log_std.expand_as(policy_out), value
+        return policy_out, value

@@ -35,9 +35,9 @@ class TestPerformanceBenchmarks:
     @pytest.mark.slow
     def test_synthesis_performance(self, examples_dir: Path) -> None:
         """Benchmark full synthesis time."""
-        spec_path = examples_dir / "text_llm_8b.yaml"
+        spec_path = examples_dir / "text" / "text_llm_8b.yaml"
         if not spec_path.exists():
-            pytest.skip("text_llm_8b.yaml not found")
+            pytest.skip("text/text_llm_8b.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"
@@ -52,9 +52,9 @@ class TestPerformanceBenchmarks:
 
     def test_spec_loading_performance(self, examples_dir: Path) -> None:
         """Benchmark spec loading and validation time."""
-        spec_path = examples_dir / "text_llm_8b.yaml"
+        spec_path = examples_dir / "text" / "text_llm_8b.yaml"
         if not spec_path.exists():
-            pytest.skip("text_llm_8b.yaml not found")
+            pytest.skip("text/text_llm_8b.yaml not found")
 
         iterations = 100
         start = time.perf_counter()
@@ -84,9 +84,9 @@ class TestPerformanceBenchmarks:
     @pytest.mark.slow
     def test_multiple_modalities_performance(self, examples_dir: Path) -> None:
         """Benchmark multimodal synthesis time."""
-        spec_path = examples_dir / "multimodal_any_to_any.yaml"
+        spec_path = examples_dir / "multimodal" / "multimodal_clip.yaml"
         if not spec_path.exists():
-            pytest.skip("multimodal_any_to_any.yaml not found")
+            pytest.skip("multimodal/multimodal_clip.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"

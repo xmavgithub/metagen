@@ -17,8 +17,8 @@
 #                    Cross-attention (conditioning)
 #
 # Example Usage:
-#   metagen synth examples/specs/image_diffusion_small.yaml --out outputs/diffusion_small/
-#   metagen automl examples/specs/image_diffusion_small.yaml --search-budget 20
+#   metagen synth examples/specs/image/image_diffusion_small.yaml --out outputs/diffusion_small/
+#   metagen automl examples/specs/image/image_diffusion_small.yaml --search-budget 20
 #
 # See Also:
 #   - image_diffusion_sdxl_like.yaml for larger SDXL-style model

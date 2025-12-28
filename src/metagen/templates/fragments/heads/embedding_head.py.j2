@@ -1,0 +1,40 @@
+# Embedding head fragment.
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class EmbeddingHead(nn.Module):
+    """Embedding head for representation learning tasks."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        embedding_dim: int = {{ blueprint.embedding_dim or 768 }},
+        normalize: bool = True,
+    ) -> None:
+        super().__init__()
+        self.normalize = normalize
+        # Projection layer if dimensions differ
+        if hidden_dim != embedding_dim:
+            self.projection = nn.Linear(hidden_dim, embedding_dim)
+        else:
+            self.projection = nn.Identity()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim) for pooled representations.
+
+        Returns:
+            Embeddings of shape (batch_size, embedding_dim).
+        """
+        # If sequence, mean pool
+        if x.dim() == 3:
+            x = x.mean(dim=1)
+        x = self.projection(x)
+        # L2 normalize for contrastive learning
+        if self.normalize:
+            x = F.normalize(x, p=2, dim=-1)
+        return x

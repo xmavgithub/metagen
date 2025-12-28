@@ -13,7 +13,7 @@ from metagen.synth.codegen import generate_code
 def test_generated_evaluation_loop_runs(tmp_path: Path) -> None:
     """Verify generated eval.py runs successfully and returns metrics."""
     # Generate code
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     spec.architecture.family = "transformer"
 
     # Manually construct a tiny blueprint for speed (CPU friendly)
