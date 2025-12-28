@@ -34,8 +34,9 @@ def test_generated_evaluation_loop_runs(tmp_path: Path) -> None:
     model_file = tmp_path / "code" / "model.py"
     content = model_file.read_text()
     # Replace the return statement to return absolute value
-    # Matches: return self.norm(x)
-    new_content = content.replace("return self.norm(x)", "return torch.abs(self.norm(x)).mean()")
+    # Replace the return statement to return absolute value
+    # Matches: return x (which is the new end of forward)
+    new_content = content.replace("return x", "return torch.abs(x).mean()")
     # Use mean() to make it scalar and satisfy the scalar check,
     # or at least abs() for non-scalar check.
     # Actually, if we make it scalar (mean), it hits the "dim()==0" branch which is safer.
