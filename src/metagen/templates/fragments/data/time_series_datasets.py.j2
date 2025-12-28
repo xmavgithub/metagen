@@ -39,5 +39,9 @@ def build_time_series_dataloader(
     batch_size: int = 8,
     shuffle: bool = True,
 ) -> DataLoader:
+    if torch is None:
+        raise RuntimeError(
+            "torch is required for time series datasets; install via pip or conda."
+        )
     dataset = SyntheticTimeSeriesDataset()
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
