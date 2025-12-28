@@ -60,7 +60,7 @@ class BaseRLTaskHandler(TaskHandler):
     task_type: str = "policy_gradient"
     head_type: str = "rl_policy_head"
     loss_type: str = "policy_gradient_loss"
-    metrics: list[str] = ["episode_return", "episode_length", "entropy"]
+    metrics: tuple[str, ...] = ("episode_return", "episode_length", "entropy")
 
     @property
     def name(self) -> str:
@@ -117,7 +117,13 @@ class BaseRLTaskHandler(TaskHandler):
         blueprint: BlueprintState,
     ) -> dict[str, Any]:
         """Define RL head architecture."""
-        action_space, num_actions, action_dim = self._resolve_action_spec(spec)
+        action_space = (blueprint.action_space or DEFAULT_ACTION_SPACE).lower()
+        num_actions = blueprint.num_actions
+        action_dim = blueprint.action_dim
+        if action_space == "discrete" and num_actions is None:
+            action_space, num_actions, action_dim = self._resolve_action_spec(spec)
+        elif action_space == "continuous" and action_dim is None:
+            action_space, num_actions, action_dim = self._resolve_action_spec(spec)
         return {
             "type": self.head_type,
             "hidden_dim": blueprint.dims["hidden_size"],
@@ -155,7 +161,7 @@ class PolicyGradientTaskHandler(BaseRLTaskHandler):
     task_type = "policy_gradient"
     head_type = "rl_policy_head"
     loss_type = "policy_gradient_loss"
-    metrics = ["episode_return", "episode_length", "entropy", "kl_divergence"]
+    metrics = ("episode_return", "episode_length", "entropy", "kl_divergence")
 
 
 @register_task("value_based")
@@ -165,7 +171,7 @@ class ValueBasedTaskHandler(BaseRLTaskHandler):
     task_type = "value_based"
     head_type = "rl_value_head"
     loss_type = "td_loss"
-    metrics = ["avg_q_value", "td_error", "episode_return"]
+    metrics = ("avg_q_value", "td_error", "episode_return")
 
 
 @register_task("actor_critic")
@@ -175,7 +181,7 @@ class ActorCriticTaskHandler(BaseRLTaskHandler):
     task_type = "actor_critic"
     head_type = "rl_actor_critic_head"
     loss_type = "actor_critic_loss"
-    metrics = ["episode_return", "value_loss", "policy_loss", "entropy"]
+    metrics = ("episode_return", "value_loss", "policy_loss", "entropy")
 
 
 @register_task("model_based")
@@ -185,4 +191,4 @@ class ModelBasedTaskHandler(BaseRLTaskHandler):
     task_type = "model_based"
     head_type = "rl_model_head"
     loss_type = "model_based_loss"
-    metrics = ["episode_return", "dynamics_loss", "policy_loss"]
+    metrics = ("episode_return", "dynamics_loss", "policy_loss")

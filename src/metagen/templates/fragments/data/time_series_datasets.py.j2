@@ -7,6 +7,17 @@ except ImportError:  # pragma: no cover
     Dataset = object
     DataLoader = object
 
+BASE_SEED = {{ blueprint.seed or 42 }}
+
+
+def _seeded_generator(idx: int | None = None, offset: int = 0):
+    if not torch:
+        raise RuntimeError("PyTorch not installed.")
+    seed = BASE_SEED + offset + (int(idx) if idx is not None else 0)
+    gen = torch.Generator()
+    gen.manual_seed(seed)
+    return gen
+
 
 class SyntheticTimeSeriesDataset(Dataset):
     """Generates random time series windows for prototyping."""
@@ -29,7 +40,12 @@ class SyntheticTimeSeriesDataset(Dataset):
     def __getitem__(self, idx: int):
         if not torch:
             return [], []
-        series = torch.randn(self.lookback + self.horizon, self.output_dim)
+        generator = _seeded_generator(idx)
+        series = torch.randn(
+            self.lookback + self.horizon,
+            self.output_dim,
+            generator=generator,
+        )
         x = series[: self.lookback]
         y = series[self.lookback :]
         return x, y
