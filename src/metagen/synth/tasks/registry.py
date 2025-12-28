@@ -129,6 +129,10 @@ def get_task_handler(spec: ModelSpec) -> TaskHandler | None:
         TaskHandler instance for the spec's task type, or None if the
         task type should use modality-only routing.
 
+    Raises:
+        ValueError: If the handler's validate_spec validation fails
+            (e.g., unsupported modality).
+
     Example:
         >>> spec = load_spec("examples/specs/image/image_classifier_resnet.yaml")
         >>> handler = get_task_handler(spec)
@@ -251,8 +255,3 @@ def clear_task_handler_cache() -> None:
     """
     _TASK_HANDLER_CACHE.clear()
     logger.debug("Task handler cache cleared")
-
-
-# Note: Task handlers are registered by importing their modules
-# See __init__.py for the list of registered handlers
-logger.debug(f"Task registry initialized. Registered types: {list_registered_task_types()}")

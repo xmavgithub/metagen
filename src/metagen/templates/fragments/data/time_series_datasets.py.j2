@@ -28,7 +28,7 @@ class SyntheticTimeSeriesDataset(Dataset):
 
     def __getitem__(self, idx: int):
         if not torch:
-            return []
+            return [], []
         series = torch.randn(self.lookback + self.horizon, self.output_dim)
         x = series[: self.lookback]
         y = series[self.lookback :]

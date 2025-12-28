@@ -31,6 +31,7 @@ constraints:
   latency: real-time
   parameter_budget:
     max: "15M"
+  image_size: [640, 640]
 
 architecture:
   family: cnn

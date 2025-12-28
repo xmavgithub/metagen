@@ -1,7 +1,7 @@
 # RL environment helpers (minimal stub).
 try:
     import gymnasium as gym
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     gym = None
 
 

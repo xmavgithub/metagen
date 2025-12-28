@@ -2,10 +2,10 @@
 try:
     import torch
     from torch.utils.data import DataLoader, Dataset
-except ImportError:  # pragma: no cover
-    torch = None
-    Dataset = object
-    DataLoader = object
+except ImportError as exc:  # pragma: no cover
+    raise ImportError(
+        "torch is required for graph datasets; install via pip or conda."
+    ) from exc
 
 
 class SyntheticGraphDataset(Dataset):
@@ -27,8 +27,10 @@ class SyntheticGraphDataset(Dataset):
         return self.size
 
     def __getitem__(self, idx: int):
-        if not torch:
-            return []
+        if torch is None:
+            raise RuntimeError(
+                "torch is required for graph datasets; install via pip or conda."
+            )
         x = torch.randn(self.num_nodes, self.node_features)
         y = torch.randint(0, self.num_classes, (self.num_nodes,))
         return x, y
@@ -38,5 +40,9 @@ def build_graph_dataloader(
     batch_size: int = 8,
     shuffle: bool = True,
 ) -> DataLoader:
+    if torch is None:
+        raise RuntimeError(
+            "torch is required for graph datasets; install via pip or conda."
+        )
     dataset = SyntheticGraphDataset()
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

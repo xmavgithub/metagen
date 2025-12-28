@@ -88,7 +88,7 @@ class BaseRLTaskHandler(TaskHandler):
 
         if action_space == "discrete":
             if num_actions is None:
-                domain = spec.task.domain.lower()
+                domain = (spec.task.domain or "").lower()
                 num_actions = DEFAULT_NUM_ACTIONS.get(domain, DEFAULT_NUM_ACTIONS["generic"])
         else:
             if action_dim is None:

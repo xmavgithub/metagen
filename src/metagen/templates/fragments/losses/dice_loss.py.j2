@@ -9,6 +9,7 @@ def dice_loss(logits: torch.Tensor, targets: torch.Tensor, epsilon: float = 1e-6
         targets: (batch, classes, H, W) or (batch, H, W)
     """
     if targets.dim() == logits.dim() - 1:
+        targets = targets.to(torch.long)
         targets = torch.nn.functional.one_hot(targets, num_classes=logits.size(1))
         targets = targets.permute(0, 3, 1, 2)
 
