@@ -53,6 +53,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+metagen = ["templates/**/*.j2", "synth/paper_templates/*.tex", "synth/paper_templates/*.sty"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

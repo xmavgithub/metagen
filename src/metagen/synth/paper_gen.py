@@ -246,13 +246,8 @@ def _generate_title(spec: ModelSpec) -> str:
 
 
 def _generate_authors() -> str:
-    """Generate the author list."""
-    return (
-        "MetaGen Research\\affilimark{1} \\and "
-        "Department of Computational Ambition\\affilimark{2}\n\n"
-        "\\affiliation{1}{Institute for Spec-Driven Development}\n"
-        "\\affiliation{2}{Center for Optimistic Parameter Estimation}"
-    )
+    """Generate the author list (simplified for LaTeX compatibility)."""
+    return "MetaGen Research"
 
 
 def _generate_keywords(spec: ModelSpec) -> str:
