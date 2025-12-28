@@ -1,0 +1,43 @@
+# Detection dataset fragment (synthetic by default).
+try:
+    import torch
+    from torch.utils.data import DataLoader, Dataset
+except ImportError:  # pragma: no cover
+    torch = None
+    Dataset = object
+    DataLoader = object
+
+
+class SyntheticDetectionDataset(Dataset):
+    """Generates random images and box annotations for prototyping."""
+
+    def __init__(
+        self,
+        size: int = 1000,
+        image_size: int = {{ blueprint.image_size or 224 }},
+        num_classes: int = {{ blueprint.num_classes or 80 }},
+        num_boxes: int = 10,
+    ) -> None:
+        self.size = size
+        self.image_size = image_size
+        self.num_classes = num_classes
+        self.num_boxes = num_boxes
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        if not torch:
+            return []
+        image = torch.randn(3, self.image_size, self.image_size)
+        boxes = torch.rand(self.num_boxes, 4)
+        labels = torch.randint(0, self.num_classes, (self.num_boxes,))
+        return image, {"boxes": boxes, "labels": labels}
+
+
+def build_detection_dataloader(
+    batch_size: int = 4,
+    shuffle: bool = True,
+) -> DataLoader:
+    dataset = SyntheticDetectionDataset()
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

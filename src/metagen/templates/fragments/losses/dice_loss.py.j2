@@ -1,0 +1,21 @@
+# Dice loss fragment for segmentation.
+import torch
+
+
+def dice_loss(logits: torch.Tensor, targets: torch.Tensor, epsilon: float = 1e-6) -> torch.Tensor:
+    """
+    Args:
+        logits: (batch, classes, H, W)
+        targets: (batch, classes, H, W) or (batch, H, W)
+    """
+    if targets.dim() == logits.dim() - 1:
+        targets = torch.nn.functional.one_hot(targets, num_classes=logits.size(1))
+        targets = targets.permute(0, 3, 1, 2)
+
+    probs = torch.sigmoid(logits)
+    targets = targets.float()
+    dims = tuple(range(2, logits.dim()))
+    intersection = (probs * targets).sum(dims)
+    union = probs.sum(dims) + targets.sum(dims)
+    dice = (2.0 * intersection + epsilon) / (union + epsilon)
+    return 1.0 - dice.mean()

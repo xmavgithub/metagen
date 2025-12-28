@@ -6,31 +6,31 @@ pipeline. Task handlers complement modality handlers by adding task-specific
 logic for classification, detection, segmentation, RL, and other task types.
 
 Supported Task Types:
-    Phase 1 (Foundation):
+    Phase 2 (Classification & Regression):
     - classification: Image/text/audio classification
     - regression: Numeric prediction
     - embedding: Vector representation learning
     - ranking: Learning to rank
 
-    Phase 2 (Detection & Segmentation):
+    Phase 3 (Detection & Segmentation):
     - object_detection: Bounding box prediction
     - instance_segmentation: Per-instance masks
     - semantic_segmentation: Per-pixel classification
     - panoptic_segmentation: Combined instance + semantic
 
-    Phase 3 (Sequence & Time Series):
+    Phase 4 (Sequence & Time Series):
     - sequence_labeling: NER, POS tagging
     - time_series_forecast: Temporal prediction
     - anomaly_detection: Outlier detection
     - speech_recognition: Audio to text
 
-    Phase 4 (Reinforcement Learning):
+    Phase 5 (Reinforcement Learning):
     - policy_gradient: PPO, A3C, REINFORCE
     - value_based: DQN, Rainbow
     - actor_critic: SAC, TD3
     - model_based: World models, MuZero
 
-    Phase 5 (Graph Neural Networks):
+    Phase 6 (Graph Neural Networks):
     - node_classification: GNN node labels
     - link_prediction: Edge prediction
     - graph_classification: Whole-graph labels
@@ -64,6 +64,7 @@ from metagen.synth.tasks.base import TaskComponents, TaskHandler
 # Phase 2: Classification & Regression handlers
 # Import to register handlers with the registry
 from metagen.synth.tasks.classification import ClassificationTaskHandler
+from metagen.synth.tasks.detection import DetectionTaskHandler
 from metagen.synth.tasks.embedding import EmbeddingTaskHandler
 from metagen.synth.tasks.ranking import RankingTaskHandler
 from metagen.synth.tasks.registry import (
@@ -75,6 +76,11 @@ from metagen.synth.tasks.registry import (
     register_task,
 )
 from metagen.synth.tasks.regression import RegressionTaskHandler
+from metagen.synth.tasks.segmentation import (
+    InstanceSegmentationTaskHandler,
+    PanopticSegmentationTaskHandler,
+    SemanticSegmentationTaskHandler,
+)
 
 __all__ = [
     # Base classes
@@ -92,4 +98,9 @@ __all__ = [
     "RegressionTaskHandler",
     "EmbeddingTaskHandler",
     "RankingTaskHandler",
+    # Phase 3 handlers
+    "DetectionTaskHandler",
+    "SemanticSegmentationTaskHandler",
+    "InstanceSegmentationTaskHandler",
+    "PanopticSegmentationTaskHandler",
 ]

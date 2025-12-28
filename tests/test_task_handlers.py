@@ -1,11 +1,15 @@
 """
-Tests for MetaGen Phase 2 Task Handlers
+Tests for MetaGen Task Handlers
 
 This module tests the task handler implementations:
 - ClassificationTaskHandler
 - RegressionTaskHandler
 - EmbeddingTaskHandler
 - RankingTaskHandler
+- DetectionTaskHandler
+- SemanticSegmentationTaskHandler
+- InstanceSegmentationTaskHandler
+- PanopticSegmentationTaskHandler
 
 Author: MetaGen Team
 Created: 2025-12-28
@@ -20,9 +24,13 @@ import pytest
 from metagen.synth.architecture import BlueprintState
 from metagen.synth.tasks import (
     ClassificationTaskHandler,
+    DetectionTaskHandler,
     EmbeddingTaskHandler,
+    InstanceSegmentationTaskHandler,
+    PanopticSegmentationTaskHandler,
     RankingTaskHandler,
     RegressionTaskHandler,
+    SemanticSegmentationTaskHandler,
     get_task_handler,
     list_registered_task_types,
 )
@@ -74,11 +82,17 @@ class MockSpec:
     architecture: MockArchitecture = field(default_factory=MockArchitecture)
 
 
-def make_blueprint(hidden_size: int = 768, layers: int = 12, heads: int = 12) -> BlueprintState:
+def make_blueprint(
+    hidden_size: int = 768,
+    layers: int = 12,
+    heads: int = 12,
+    image_size: int | None = None,
+) -> BlueprintState:
     """Create a test BlueprintState."""
     return BlueprintState(
         dims={"hidden_size": hidden_size, "layers": layers, "heads": heads},
         family="transformer",
+        image_size=image_size,
     )
 
 
@@ -100,6 +114,17 @@ class TestHandlerRegistration:
     def test_ranking_registered(self) -> None:
         """Test that ranking handler is registered."""
         assert "ranking" in list_registered_task_types()
+
+    def test_detection_registered(self) -> None:
+        """Test that detection handler is registered."""
+        assert "object_detection" in list_registered_task_types()
+
+    def test_segmentation_registered(self) -> None:
+        """Test that segmentation handlers are registered."""
+        task_types = list_registered_task_types()
+        assert "semantic_segmentation" in task_types
+        assert "instance_segmentation" in task_types
+        assert "panoptic_segmentation" in task_types
 
 
 class TestClassificationTaskHandler:
@@ -438,6 +463,155 @@ class TestRankingTaskHandler:
 
         assert "ndcg_at_10" in metrics or "ndcg_at_5" in metrics
         assert "mrr" in metrics
+
+
+class TestDetectionTaskHandler:
+    """Tests for DetectionTaskHandler."""
+
+    def test_name(self) -> None:
+        """Test handler name property."""
+        handler = DetectionTaskHandler()
+        assert handler.name == "object_detection"
+
+    def test_supported_modalities(self) -> None:
+        """Test supported modalities."""
+        handler = DetectionTaskHandler()
+        assert "image" in handler.supported_modalities
+        assert "video" in handler.supported_modalities
+
+    def test_output_type(self) -> None:
+        """Test output type."""
+        handler = DetectionTaskHandler()
+        assert handler.output_type == "bounding_boxes"
+
+    def test_augment_blueprint_defaults(self) -> None:
+        """Test augment_blueprint uses detection defaults."""
+        handler = DetectionTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["bounding_boxes"]),
+            task=MockTask(type="object_detection", num_classes=None, domain="coco"),
+        )
+        blueprint = make_blueprint()
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.num_classes == 80
+        assert augmented.num_anchors == 9
+
+    def test_get_head_architecture(self) -> None:
+        """Test get_head_architecture returns correct structure."""
+        handler = DetectionTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["bounding_boxes"]),
+            task=MockTask(type="object_detection", num_classes=80, num_anchors=6),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "detection_head"
+        assert head["num_classes"] == 80
+        assert head["num_anchors"] == 6
+
+    def test_get_loss_function(self) -> None:
+        """Test get_loss_function for detection."""
+        handler = DetectionTaskHandler()
+        spec = MockSpec(task=MockTask(type="object_detection"))
+
+        loss = handler.get_loss_function(spec)
+
+        assert loss == "detection_loss"
+
+    def test_get_metrics(self) -> None:
+        """Test get_metrics for detection."""
+        handler = DetectionTaskHandler()
+        spec = MockSpec(task=MockTask(type="object_detection"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "mAP" in metrics
+
+    def test_get_task_handler_returns_detection(self) -> None:
+        """Test that get_task_handler returns DetectionTaskHandler."""
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["bounding_boxes"]),
+            task=MockTask(type="object_detection"),
+        )
+
+        handler = get_task_handler(spec)
+
+        assert isinstance(handler, DetectionTaskHandler)
+
+
+class TestSegmentationTaskHandlers:
+    """Tests for segmentation task handlers."""
+
+    def test_semantic_name(self) -> None:
+        """Test semantic segmentation name."""
+        handler = SemanticSegmentationTaskHandler()
+        assert handler.name == "semantic_segmentation"
+
+    def test_output_type(self) -> None:
+        """Test segmentation output type."""
+        handler = SemanticSegmentationTaskHandler()
+        assert handler.output_type == "segmentation_mask"
+
+    def test_augment_blueprint_defaults(self) -> None:
+        """Test augment_blueprint defaults for segmentation."""
+        handler = SemanticSegmentationTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["segmentation_mask"]),
+            task=MockTask(type="semantic_segmentation", num_classes=None, domain="cityscapes"),
+        )
+        blueprint = make_blueprint(image_size=256)
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.num_classes == 19
+        assert augmented.mask_resolution == 256
+
+    def test_get_head_architecture(self) -> None:
+        """Test segmentation head architecture."""
+        handler = SemanticSegmentationTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["segmentation_mask"]),
+            task=MockTask(type="semantic_segmentation", num_classes=19, mask_resolution=128),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "segmentation_head"
+        assert head["num_classes"] == 19
+        assert head["mask_resolution"] == 128
+
+    def test_semantic_metrics(self) -> None:
+        """Test semantic segmentation metrics."""
+        handler = SemanticSegmentationTaskHandler()
+        spec = MockSpec(task=MockTask(type="semantic_segmentation"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "mIoU" in metrics
+        assert "pixel_accuracy" in metrics
+
+    def test_instance_metrics(self) -> None:
+        """Test instance segmentation metrics."""
+        handler = InstanceSegmentationTaskHandler()
+        spec = MockSpec(task=MockTask(type="instance_segmentation"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "mAP_mask" in metrics
+
+    def test_panoptic_metrics(self) -> None:
+        """Test panoptic segmentation metrics."""
+        handler = PanopticSegmentationTaskHandler()
+        spec = MockSpec(task=MockTask(type="panoptic_segmentation"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "PQ" in metrics
 
 
 class TestGenerateComponents:

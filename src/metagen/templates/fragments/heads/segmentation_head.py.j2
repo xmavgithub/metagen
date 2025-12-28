@@ -1,0 +1,61 @@
+# Segmentation head fragment.
+import math
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class SegmentationHead(nn.Module):
+    """Segmentation head for per-pixel classification."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        num_classes: int = {{ blueprint.num_classes or 21 }},
+        mask_resolution: int = {{ blueprint.mask_resolution or 128 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.mask_resolution = mask_resolution
+        self.dropout = nn.Dropout(dropout)
+        self.proj = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            Segmentation logits of shape (batch_size, num_classes, H, W).
+        """
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
+
+        x = self.dropout(x)
+        logits = self.proj(x)
+        logits = logits.permute(0, 2, 1)
+
+        seq_len = logits.size(-1)
+        grid = int(math.sqrt(seq_len))
+        if grid * grid == seq_len:
+            logits = logits.reshape(logits.size(0), logits.size(1), grid, grid)
+            if self.mask_resolution and self.mask_resolution != grid:
+                logits = F.interpolate(
+                    logits,
+                    size=(self.mask_resolution, self.mask_resolution),
+                    mode="bilinear",
+                    align_corners=False,
+                )
+            return logits
+
+        pooled = logits.mean(dim=-1, keepdim=True)
+        pooled = pooled.unsqueeze(-1)
+        if self.mask_resolution:
+            pooled = pooled.expand(
+                pooled.size(0),
+                pooled.size(1),
+                self.mask_resolution,
+                self.mask_resolution,
+            )
+        return pooled

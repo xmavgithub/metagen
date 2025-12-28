@@ -1,0 +1,55 @@
+# MetaGen Spec: YOLOv8 Object Detector
+#
+# YOLO-style CNN detector for COCO object detection.
+#
+# Key Parameters:
+#   - Image size: 640x640
+#   - Architecture: CNN (YOLOv8-like)
+#   - Number of classes: 80 (COCO)
+#   - Anchors: 9
+#
+# Example Usage:
+#   metagen synth examples/specs/object_detector_yolo.yaml --out outputs/yolo/
+
+metagen_version: "1.0"
+name: "YOLOv8 COCO Detector"
+
+modality:
+  inputs:
+    - image
+  outputs:
+    - bounding_boxes
+
+task:
+  type: object_detection
+  domain: coco
+  num_classes: 80
+  num_anchors: 9
+
+constraints:
+  device: edge
+  latency: real-time
+  parameter_budget:
+    max: "15M"
+
+architecture:
+  family: cnn
+
+training:
+  objective:
+    - object_detection
+  data:
+    sources:
+      - coco
+    size: "118k images"
+  compute:
+    hardware: "4xA100"
+    duration: "12 hours"
+
+evaluation:
+  benchmarks:
+    - coco_2017_val
+  metrics:
+    - mAP
+    - mAP_50
+    - mAP_75

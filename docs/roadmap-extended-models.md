@@ -488,12 +488,12 @@ src/metagen/
 - [x] Add example specs (5 new specs)
 - [x] Add tests (43 new tests)
 
-### Phase 3: Detection & Segmentation (2-3 days)
-- [ ] Implement DetectionTaskHandler
-- [ ] Implement SegmentationTaskHandler
-- [ ] Add detection/segmentation head templates
-- [ ] Add example specs
-- [ ] Add tests
+### Phase 3: Detection & Segmentation (2-3 days) ✅ COMPLETED
+- [x] Implement DetectionTaskHandler
+- [x] Implement SegmentationTaskHandler
+- [x] Add detection/segmentation head templates
+- [x] Add example specs
+- [x] Add tests
 
 ### Phase 4: Time Series (1-2 days)
 - [ ] Implement TimeSeriesTaskHandler

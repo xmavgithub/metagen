@@ -1,0 +1,40 @@
+# Segmentation dataset fragment (synthetic by default).
+try:
+    import torch
+    from torch.utils.data import DataLoader, Dataset
+except ImportError:  # pragma: no cover
+    torch = None
+    Dataset = object
+    DataLoader = object
+
+
+class SyntheticSegmentationDataset(Dataset):
+    """Generates random images and segmentation masks for prototyping."""
+
+    def __init__(
+        self,
+        size: int = 1000,
+        image_size: int = {{ blueprint.image_size or 224 }},
+        num_classes: int = {{ blueprint.num_classes or 21 }},
+    ) -> None:
+        self.size = size
+        self.image_size = image_size
+        self.num_classes = num_classes
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        if not torch:
+            return []
+        image = torch.randn(3, self.image_size, self.image_size)
+        mask = torch.randint(0, self.num_classes, (self.image_size, self.image_size))
+        return image, mask
+
+
+def build_segmentation_dataloader(
+    batch_size: int = 4,
+    shuffle: bool = True,
+) -> DataLoader:
+    dataset = SyntheticSegmentationDataset()
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

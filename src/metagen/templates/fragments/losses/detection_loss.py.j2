@@ -1,0 +1,21 @@
+# Detection loss fragment (classification + box regression).
+import torch
+import torch.nn.functional as F
+
+
+def detection_loss(
+    pred_logits: torch.Tensor,
+    pred_boxes: torch.Tensor,
+    target_labels: torch.Tensor,
+    target_boxes: torch.Tensor,
+) -> torch.Tensor:
+    """
+    Args:
+        pred_logits: (batch, anchors, num_classes)
+        pred_boxes: (batch, anchors, 4)
+        target_labels: (batch, anchors)
+        target_boxes: (batch, anchors, 4)
+    """
+    cls_loss = F.cross_entropy(pred_logits.view(-1, pred_logits.size(-1)), target_labels.view(-1))
+    bbox_loss = F.l1_loss(pred_boxes, target_boxes)
+    return cls_loss + bbox_loss

@@ -1,0 +1,55 @@
+# MetaGen Spec: U-Net Semantic Segmentation
+#
+# U-Net style CNN for semantic segmentation.
+#
+# Key Parameters:
+#   - Image size: 512x512
+#   - Architecture: CNN (U-Net)
+#   - Number of classes: 2 (binary segmentation)
+#   - Mask resolution: 512
+#
+# Example Usage:
+#   metagen synth examples/specs/semantic_segmentation_unet.yaml --out outputs/unet/
+
+metagen_version: "1.0"
+name: "U-Net Semantic Segmentation"
+
+modality:
+  inputs:
+    - image
+  outputs:
+    - segmentation_mask
+
+task:
+  type: semantic_segmentation
+  domain: medical
+  num_classes: 2
+  mask_resolution: 512
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "30M"
+
+architecture:
+  family: cnn
+
+training:
+  objective:
+    - semantic_segmentation
+  data:
+    sources:
+      - medical
+    size: "10k images"
+  compute:
+    hardware: "2xA100"
+    duration: "6 hours"
+
+evaluation:
+  benchmarks:
+    - dice_score
+    - iou
+  metrics:
+    - mIoU
+    - pixel_accuracy
