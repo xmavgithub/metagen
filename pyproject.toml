@@ -41,8 +41,15 @@ Issues = "https://github.com/xmavgithub/metagen/issues"
 Changelog = "https://github.com/xmavgithub/metagen/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+rl = ["gymnasium>=1.2.3"]
 torch = ["torch>=2.2.0"]
-dev = ["ruff>=0.3.0", "pytest>=8.0.0", "pytest-cov>=4.1.0", "torch>=2.2.0"]
+dev = [
+  "gymnasium>=1.2.3",
+  "ruff>=0.3.0",
+  "pytest>=8.0.0",
+  "pytest-cov>=4.1.0",
+  "torch>=2.2.0",
+]
 
 [project.scripts]
 metagen = "metagen.cli:app"

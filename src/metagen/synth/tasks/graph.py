@@ -81,8 +81,9 @@ class NodeClassificationTaskHandler(TaskHandler):
         seed: int,
     ) -> BlueprintState:
         node_features, edge_features = _resolve_graph_features(spec)
+        domain_key = (spec.task.domain or "generic").lower()
         num_classes = spec.task.num_classes or DEFAULT_NUM_CLASSES.get(
-            spec.task.domain.lower(), DEFAULT_NUM_CLASSES["generic"]
+            domain_key, DEFAULT_NUM_CLASSES["generic"]
         )
         return replace(
             blueprint,
@@ -140,8 +141,9 @@ class GraphClassificationTaskHandler(TaskHandler):
         seed: int,
     ) -> BlueprintState:
         node_features, edge_features = _resolve_graph_features(spec)
+        domain_key = (spec.task.domain or "generic").lower()
         num_classes = spec.task.num_classes or DEFAULT_NUM_CLASSES.get(
-            spec.task.domain.lower(), DEFAULT_NUM_CLASSES["generic"]
+            domain_key, DEFAULT_NUM_CLASSES["generic"]
         )
         return replace(
             blueprint,

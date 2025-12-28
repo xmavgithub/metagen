@@ -120,9 +120,9 @@ def train(
                 {% if task_components and task_components.loss_type %}
                 # Task-specific loss calculation
                 if y is not None:
-                     loss = criterion(output, y)
+                    loss = criterion(output, y)
                 else:
-                     raise ValueError(f"Task {{ task_components.head_type }} requires targets (y).")
+                    raise ValueError(f"Task {{ task_components.head_type }} requires targets (y).")
                 {% elif blueprint.vocab_size %}
                 # Reshape for CrossEntropy: [B*T, V], [B*T]
                 if y is not None:

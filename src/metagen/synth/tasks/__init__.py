@@ -59,6 +59,8 @@ Author: MetaGen Team
 Created: 2025-12-28
 """
 
+import logging
+
 from metagen.synth.tasks.base import TaskComponents, TaskHandler
 
 # Phase 2: Classification & Regression handlers
@@ -96,6 +98,13 @@ from metagen.synth.tasks.segmentation import (
 from metagen.synth.tasks.time_series import (
     AnomalyDetectionTaskHandler,
     TimeSeriesForecastTaskHandler,
+)
+
+logger = logging.getLogger(__name__)
+
+logger.debug(
+    "Task registry initialized. Registered types: %s",
+    list_registered_task_types(),
 )
 
 __all__ = [
