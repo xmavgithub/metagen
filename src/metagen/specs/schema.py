@@ -2,9 +2,73 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
-SUPPORTED_INPUTS = {"text", "image", "audio", "video", "3d", "multimodal"}
-SUPPORTED_OUTPUTS = {"text", "image", "audio", "video", "3d", "multimodal"}
+# Base modality types (existing)
+SUPPORTED_INPUTS = {
+    # Existing generative modalities
+    "text",
+    "image",
+    "audio",
+    "video",
+    "3d",
+    "multimodal",
+    # New input types for extended model support
+    "time_series",  # Temporal/sequential data
+    "graph",  # Graph/network data
+    "tabular",  # Structured/tabular data
+    "point_cloud",  # 3D point clouds
+}
+
+SUPPORTED_OUTPUTS = {
+    # Existing generative modalities
+    "text",
+    "image",
+    "audio",
+    "video",
+    "3d",
+    "multimodal",
+    # New output types for extended model support
+    "label",  # Classification output
+    "bounding_boxes",  # Detection output
+    "segmentation_mask",  # Segmentation output
+    "embedding",  # Vector representation
+    "action",  # RL action output
+    "time_series",  # Temporal prediction
+    "graph",  # Graph output
+    "regression",  # Numeric prediction
+}
+
 UNSUPPORTED_MODALITIES = {"taste", "smell", "vibes"}
+
+# Valid task types for task-based routing
+VALID_TASK_TYPES = {
+    # Existing
+    "generation",
+    # Phase 1: Classification & Regression
+    "classification",
+    "regression",
+    "embedding",
+    "ranking",
+    # Phase 2: Detection & Segmentation
+    "object_detection",
+    "instance_segmentation",
+    "semantic_segmentation",
+    "panoptic_segmentation",
+    # Phase 3: Sequence & Time Series
+    "sequence_labeling",
+    "time_series_forecast",
+    "anomaly_detection",
+    "speech_recognition",
+    # Phase 4: Reinforcement Learning
+    "policy_gradient",
+    "value_based",
+    "actor_critic",
+    "model_based",
+    # Phase 5: Graph Neural Networks
+    "node_classification",
+    "link_prediction",
+    "graph_classification",
+    "recommendation",
+}
 
 
 class ParameterBudget(BaseModel):
@@ -102,8 +166,38 @@ class Modality(BaseModel):
 
 
 class Task(BaseModel):
-    type: str = Field("generation")
-    domain: str = Field("generic")
+    """Task configuration for model synthesis."""
+
+    type: str = Field("generation", description="Task type (generation, classification, etc.)")
+    domain: str = Field("generic", description="Application domain (generic, image, finance, etc.)")
+
+    # Classification/Regression fields
+    num_classes: int | None = Field(None, description="Number of output classes for classification")
+    num_outputs: int | None = Field(None, description="Number of outputs for regression")
+
+    # Time Series fields
+    horizon: int | None = Field(None, description="Prediction horizon for time series forecasting")
+    lookback: int | None = Field(None, description="Number of historical steps to consider")
+
+    # RL fields
+    action_space: str | None = Field(
+        None, description="Action space type: 'discrete' or 'continuous'"
+    )
+    num_actions: int | None = Field(None, description="Number of discrete actions")
+    action_dim: int | None = Field(None, description="Dimension of continuous action space")
+
+    # Detection/Segmentation fields
+    num_anchors: int | None = Field(None, description="Number of anchor boxes for detection")
+    mask_resolution: int | None = Field(None, description="Output mask resolution for segmentation")
+
+    # Graph fields
+    node_features: int | None = Field(None, description="Number of node features for GNN")
+    edge_features: int | None = Field(None, description="Number of edge features for GNN")
+
+    # Embedding fields
+    embedding_dim: int | None = Field(None, description="Output embedding dimension")
+
+    model_config = {"extra": "forbid"}
 
 
 class ModelSpec(BaseModel):
