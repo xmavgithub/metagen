@@ -14,8 +14,8 @@
 #   - Parameter count: ~86M
 #
 # Example Usage:
-#   metagen synth examples/specs/image_vit_base.yaml --out outputs/vit_base/
-#   metagen paper examples/specs/image_vit_base.yaml --out paper/vit_base/
+#   metagen synth examples/specs/image/image_vit_base.yaml --out outputs/vit_base/
+#   metagen paper examples/specs/image/image_vit_base.yaml --out paper/vit_base/
 #
 # See Also:
 #   - image_vit_large.yaml for ViT-Large (307M parameters)

@@ -21,7 +21,7 @@ Example Usage:
     >>> from metagen.synth.modalities import ImageModalityHandler
     >>> from metagen.specs.loader import load_spec
     >>>
-    >>> spec = load_spec("examples/specs/image_vit_base.yaml")
+    >>> spec = load_spec("examples/specs/image/image_vit_base.yaml")
     >>> handler = ImageModalityHandler()
     >>>
     >>> # Augment blueprint with image-specific parameters

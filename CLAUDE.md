@@ -52,17 +52,17 @@ ruff check --fix src  # Auto-fix lint issues
 make demo           # Run demo synthesis on example specs
 metagen demo        # Same as above
 
-metagen synth examples/specs/text_llm_8b.yaml --out outputs/
-metagen paper examples/specs/text_llm_8b.yaml --out paper/
+metagen synth examples/specs/text/text_llm_8b.yaml --out outputs/
+metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
 metagen schema      # Print JSON schema for specs
-metagen validate examples/specs/text_llm_8b.yaml
+metagen validate examples/specs/text/text_llm_8b.yaml
 ```
 
 ### Building Paper PDF
 
 ```bash
 # Generate paper LaTeX project
-metagen paper examples/specs/text_llm_8b.yaml --out paper/
+metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
 
 # Build PDF (requires LaTeX - see Setup section)
 cd paper && make pdf
@@ -168,14 +168,14 @@ outputs/<run_id>/
 
 See `examples/specs/` for reference specifications:
 
-- `text_llm_8b.yaml` - Text LLM with 8B parameter budget
-- `image_diffusion_sdxl_like.yaml` - Image diffusion model
-- `audio_musicgen_like.yaml` - Audio generation
-- `video_realtime_avatar.yaml` - Video generation
-- `3d_text_to_mesh.yaml` - 3D mesh generation
-- `edge_tiny_agent.yaml` - Edge deployment constraints
-- `infinite_context.yaml` - Triggers warning for infinite context
-- `taste_generation.yaml` - Triggers warning for unsupported modality
+- `text/text_llm_8b.yaml` - Text LLM with 8B parameter budget
+- `image/image_diffusion_sdxl_like.yaml` - Image diffusion model
+- `audio/audio_musicgen_like.yaml` - Audio generation
+- `video/video_realtime_avatar.yaml` - Video generation
+- `3d/3d_text_to_mesh.yaml` - 3D mesh generation
+- `text/edge_tiny_agent.yaml` - Edge deployment constraints
+- `text/infinite_context.yaml` - Triggers warning for infinite context
+- `misc/taste_generation.yaml` - Triggers warning for unsupported modality
 
 ## Testing Philosophy
 

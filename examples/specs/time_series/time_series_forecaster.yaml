@@ -8,7 +8,7 @@
 #   - Output dimension: 1
 #
 # Example Usage:
-#   metagen synth examples/specs/time_series_forecaster.yaml --out outputs/ts_forecaster/
+#   metagen synth examples/specs/time_series/time_series_forecaster.yaml --out outputs/ts_forecaster/
 
 metagen_version: "1.0"
 name: "Stock Price Forecaster"

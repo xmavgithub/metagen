@@ -12,7 +12,7 @@ Learn to use MetaGen's AutoML system to discover optimal architectures.
 Start with a fast exploration:
 
 ```bash
-metagen automl examples/specs/text_llm_8b.yaml --search-budget 10
+metagen automl examples/specs/text/text_llm_8b.yaml --search-budget 10
 ```
 
 You'll see a table of top candidates:
@@ -49,7 +49,7 @@ Key fields:
 More candidates = better exploration:
 
 ```bash
-metagen automl examples/specs/text_llm_8b.yaml --search-budget 50
+metagen automl examples/specs/text/text_llm_8b.yaml --search-budget 50
 ```
 
 ## Step 4: Use Evolutionary Search
@@ -57,7 +57,7 @@ metagen automl examples/specs/text_llm_8b.yaml --search-budget 50
 For better results, use evolution:
 
 ```bash
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --strategy evolution \
     --generations 5 \
     --population-size 10
@@ -74,7 +74,7 @@ This runs 5 generations of:
 Display top 10 instead of top 3:
 
 ```bash
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --search-budget 30 \
     --top-k 10
 ```
@@ -84,7 +84,7 @@ metagen automl examples/specs/text_llm_8b.yaml \
 Train tiny models to get real loss values:
 
 ```bash
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --train-prototypes \
     --prototype-steps 100
 ```

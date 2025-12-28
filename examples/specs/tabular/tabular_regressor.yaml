@@ -9,7 +9,7 @@
 #   - Parameter count: ~1M
 #
 # Example Usage:
-#   metagen synth examples/specs/tabular_regressor.yaml --out outputs/house_price/
+#   metagen synth examples/specs/tabular/tabular_regressor.yaml --out outputs/house_price/
 
 metagen_version: "1.0"
 name: "House Price Predictor"

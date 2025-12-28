@@ -13,7 +13,7 @@ services:
     working_dir: /app
 
     # Override entrypoint for interactive use
-    # docker compose run metagen synth /app/specs/text_llm_8b.yaml --out /app/outputs/
+    # docker compose run metagen synth /app/specs/text/text_llm_8b.yaml --out /app/outputs/
 
   # Convenience service for demo
   demo:
@@ -30,4 +30,4 @@ services:
     volumes:
       - ./outputs:/app/outputs
       - ./examples/specs:/app/specs:ro
-    command: ["paper", "/app/specs/text_llm_8b.yaml", "--out", "/app/outputs/paper"]
+    command: ["paper", "/app/specs/text/text_llm_8b.yaml", "--out", "/app/outputs/paper"]

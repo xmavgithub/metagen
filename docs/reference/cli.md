@@ -33,7 +33,7 @@ metagen synth [OPTIONS] SPEC_PATH
 
 ```bash
 # Basic synthesis
-metagen synth examples/specs/text_llm_8b.yaml
+metagen synth examples/specs/text/text_llm_8b.yaml
 
 # Custom output directory
 metagen synth my_spec.yaml --out my_outputs/
@@ -84,7 +84,7 @@ metagen paper [OPTIONS] SPEC_PATH
 
 ```bash
 # Generate paper
-metagen paper examples/specs/text_llm_8b.yaml --out paper/
+metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
 
 # Build PDF (requires LaTeX)
 cd paper && make pdf

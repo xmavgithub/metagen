@@ -13,7 +13,7 @@ def test_train_raises_value_error_missing_targets(tmp_path: Path) -> None:
     """Verify that generated train.py raises ValueError if targets are missing."""
 
     # 1. Generate code for a vocab-based model
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
 
     # Tiny blueprint
     blueprint = BlueprintState(
@@ -100,7 +100,7 @@ def test_train_raises_value_error_missing_targets_no_vocab(tmp_path: Path) -> No
     """Verify that generated train.py raises ValueError if targets are missing (NO vocab)."""
 
     # 1. Generate code for a NO-vocab model (e.g. image)
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")  # Reuse spec but force blueprint
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")  # Reuse spec but force blueprint
 
     # Tiny blueprint NO VOCAB
     blueprint = BlueprintState(

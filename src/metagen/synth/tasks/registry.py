@@ -21,14 +21,14 @@ Example Usage:
     >>> from metagen.synth.tasks import get_task_handler
     >>> from metagen.specs.loader import load_spec
     >>>
-    >>> spec = load_spec("examples/specs/image_classifier.yaml")
+    >>> spec = load_spec("examples/specs/image/image_classifier_resnet.yaml")
     >>> handler = get_task_handler(spec)
     >>> if handler:
     ...     print(handler.name)
     'classification'
     >>>
     >>> # For generative models, returns None (use modality handler)
-    >>> gen_spec = load_spec("examples/specs/text_llm_8b.yaml")
+    >>> gen_spec = load_spec("examples/specs/text/text_llm_8b.yaml")
     >>> handler = get_task_handler(gen_spec)
     >>> print(handler)
     None
@@ -130,7 +130,7 @@ def get_task_handler(spec: ModelSpec) -> TaskHandler | None:
         task type should use modality-only routing.
 
     Example:
-        >>> spec = load_spec("examples/specs/image_classifier.yaml")
+        >>> spec = load_spec("examples/specs/image/image_classifier_resnet.yaml")
         >>> handler = get_task_handler(spec)
         >>> if handler:
         ...     augmented = handler.augment_blueprint(spec, blueprint, 42)
@@ -138,7 +138,7 @@ def get_task_handler(spec: ModelSpec) -> TaskHandler | None:
         1000
 
         >>> # Generative tasks return None
-        >>> gen_spec = load_spec("examples/specs/text_llm_8b.yaml")
+        >>> gen_spec = load_spec("examples/specs/text/text_llm_8b.yaml")
         >>> handler = get_task_handler(gen_spec)
         >>> print(handler)
         None

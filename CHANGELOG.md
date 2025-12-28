@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Image size parsing (224, 384, 512, presets like "imagenet", "sd")
   - Patch size configuration for ViT models
   - Support for transformer, CNN, diffusion, and hybrid families
-  - Example specs: `examples/specs/image_vit_base.yaml`, `examples/specs/image_diffusion_small.yaml`
+  - Example specs: `examples/specs/image/image_vit_base.yaml`, `examples/specs/image/image_diffusion_small.yaml`
 - **AutoML Search Base**: Random-search baseline for candidate architectures
   - `ArchitectureSearchEngine` with deterministic sampling
   - Candidate metrics and scoring heuristics

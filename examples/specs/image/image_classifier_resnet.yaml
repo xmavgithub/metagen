@@ -10,7 +10,7 @@
 #   - Parameter count: ~25M
 #
 # Example Usage:
-#   metagen synth examples/specs/image_classifier_resnet.yaml --out outputs/resnet50/
+#   metagen synth examples/specs/image/image_classifier_resnet.yaml --out outputs/resnet50/
 
 metagen_version: "1.0"
 name: "ResNet-50 ImageNet Classifier"

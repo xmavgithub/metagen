@@ -13,10 +13,10 @@ The AutoML system explores the architecture space to find configurations that ba
 
 ```bash
 # Basic random search
-metagen automl examples/specs/text_llm_8b.yaml --search-budget 20
+metagen automl examples/specs/text/text_llm_8b.yaml --search-budget 20
 
 # Evolutionary search (recommended for larger budgets)
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --strategy evolution \
     --generations 5 \
     --population-size 10

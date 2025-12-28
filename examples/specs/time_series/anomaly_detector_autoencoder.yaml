@@ -8,7 +8,7 @@
 #   - Output dimension: 4
 #
 # Example Usage:
-#   metagen synth examples/specs/anomaly_detector_autoencoder.yaml --out outputs/ts_anomaly/
+#   metagen synth examples/specs/time_series/anomaly_detector_autoencoder.yaml --out outputs/ts_anomaly/
 
 metagen_version: "1.0"
 name: "Sensor Anomaly Detector"

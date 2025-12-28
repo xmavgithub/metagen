@@ -9,7 +9,7 @@
 #   - Mask resolution: 28
 #
 # Example Usage:
-#   metagen synth examples/specs/instance_segmentation_maskrcnn.yaml --out outputs/maskrcnn/
+#   metagen synth examples/specs/image/instance_segmentation_maskrcnn.yaml --out outputs/maskrcnn/
 
 metagen_version: "1.0"
 name: "Mask R-CNN Instance Segmentation"

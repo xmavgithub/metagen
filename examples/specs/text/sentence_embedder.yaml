@@ -9,7 +9,7 @@
 #   - Parameter count: ~110M
 #
 # Example Usage:
-#   metagen synth examples/specs/sentence_embedder.yaml --out outputs/sentence_embedder/
+#   metagen synth examples/specs/text/sentence_embedder.yaml --out outputs/sentence_embedder/
 
 metagen_version: "1.0"
 name: "Sentence Transformer Embedder"

@@ -70,13 +70,13 @@ docker build -t metagen .
 docker run -v $(pwd)/outputs:/app/outputs metagen demo
 
 # Synthesize from spec
-docker run -v $(pwd)/outputs:/app/outputs metagen synth examples/specs/text_llm_8b.yaml --out /app/outputs/
+docker run -v $(pwd)/outputs:/app/outputs metagen synth examples/specs/text/text_llm_8b.yaml --out /app/outputs/
 
 # Generate paper (includes LaTeX)
-docker run -v $(pwd)/outputs:/app/outputs metagen paper examples/specs/text_llm_8b.yaml --out /app/outputs/paper
+docker run -v $(pwd)/outputs:/app/outputs metagen paper examples/specs/text/text_llm_8b.yaml --out /app/outputs/paper
 
 # Or use docker compose
-docker compose run metagen synth examples/specs/text_llm_8b.yaml --out /app/outputs/
+docker compose run metagen synth examples/specs/text/text_llm_8b.yaml --out /app/outputs/
 docker compose run demo
 ```
 
@@ -84,7 +84,7 @@ docker compose run demo
 
 ```bash
 # Generate a complete release package from a spec
-metagen synth examples/specs/text_llm_8b.yaml --out outputs/
+metagen synth examples/specs/text/text_llm_8b.yaml --out outputs/
 
 # See what was generated
 tree outputs/
@@ -135,11 +135,11 @@ MetaGen synthesizes architectures for **5 modalities** with specialized handlers
 
 | Modality | Architectures | Example Spec |
 |----------|---------------|--------------|
-| **Text** | Transformer, GPT-style, BERT-style | `text_llm_8b.yaml` |
-| **Image** | ViT, CNN, U-Net, Diffusion | `image_diffusion_sdxl_like.yaml` |
-| **Audio** | Transformer, WaveNet-style | `audio_musicgen.yaml` |
-| **Video** | 3D-CNN, Temporal Transformer | `video_generation.yaml` |
-| **Multi-modal** | CLIP-style, Cross-attention fusion | `multimodal_clip.yaml` |
+| **Text** | Transformer, GPT-style, BERT-style | `text/text_llm_8b.yaml` |
+| **Image** | ViT, CNN, U-Net, Diffusion | `image/image_diffusion_sdxl_like.yaml` |
+| **Audio** | Transformer, WaveNet-style | `audio/audio_musicgen.yaml` |
+| **Video** | 3D-CNN, Temporal Transformer | `video/video_generation.yaml` |
+| **Multi-modal** | CLIP-style, Cross-attention fusion | `multimodal/multimodal_clip.yaml` |
 
 ### AutoML Architecture Search
 
@@ -147,16 +147,16 @@ Find optimal architectures automatically:
 
 ```bash
 # Random search (fast)
-metagen automl examples/specs/text_llm_8b.yaml --search-budget 20
+metagen automl examples/specs/text/text_llm_8b.yaml --search-budget 20
 
 # Evolutionary search (better)
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --strategy evolution \
     --generations 5 \
     --population-size 10
 
 # With prototype training validation
-metagen automl examples/specs/text_llm_8b.yaml \
+metagen automl examples/specs/text/text_llm_8b.yaml \
     --train-prototypes \
     --prototype-steps 100
 ```
@@ -172,7 +172,7 @@ metagen automl examples/specs/text_llm_8b.yaml \
 Generate publication-ready LaTeX papers:
 
 ```bash
-metagen paper examples/specs/text_llm_8b.yaml --out paper/
+metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
 cd paper && make pdf
 ```
 
@@ -266,15 +266,15 @@ architecture:
 
 | Spec | Description | Modality | Params |
 |------|-------------|----------|--------|
-| `text_llm_8b.yaml` | Large language model | text→text | 8B |
-| `text_llm_tiny.yaml` | Tiny LLM for testing | text→text | 50M |
-| `image_diffusion_sdxl_like.yaml` | High-res diffusion | text+image→image | 6B |
-| `image_vit_base.yaml` | Vision Transformer | image→image | 86M |
-| `audio_musicgen.yaml` | Music generation | audio→audio | 1B |
-| `video_generation.yaml` | Video synthesis | text→video | 2B |
-| `multimodal_clip.yaml` | CLIP-style model | text+image→both | 800M |
-| `edge_tiny_agent.yaml` | Edge deployment | text→text | 50M |
-| `3d_text_to_mesh.yaml` | 3D mesh generation | text→3d | 1B |
+| `text/text_llm_8b.yaml` | Large language model | text→text | 8B |
+| `text/text_llm_tiny.yaml` | Tiny LLM for testing | text→text | 50M |
+| `image/image_diffusion_sdxl_like.yaml` | High-res diffusion | text+image→image | 6B |
+| `image/image_vit_base.yaml` | Vision Transformer | image→image | 86M |
+| `audio/audio_musicgen.yaml` | Music generation | audio→audio | 1B |
+| `video/video_generation.yaml` | Video synthesis | text→video | 2B |
+| `multimodal/multimodal_clip.yaml` | CLIP-style model | text+image→both | 800M |
+| `text/edge_tiny_agent.yaml` | Edge deployment | text→text | 50M |
+| `3d/3d_text_to_mesh.yaml` | 3D mesh generation | text→3d | 1B |
 
 </details>
 

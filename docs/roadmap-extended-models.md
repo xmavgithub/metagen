@@ -446,21 +446,21 @@ src/metagen/
 ## Example Specs (to be added to examples/specs/)
 
 ### Classification
-- `image_classifier_resnet.yaml` - ResNet-50 ImageNet classifier
-- `text_classifier_bert.yaml` - BERT sentiment classifier
-- `audio_classifier_ast.yaml` - Audio spectrogram transformer
+- `image/image_classifier_resnet.yaml` - ResNet-50 ImageNet classifier
+- `text/text_classifier_bert.yaml` - BERT sentiment classifier
+- `audio/audio_classifier_ast.yaml` - Audio spectrogram transformer
 
 ### Detection
-- `object_detector_yolo.yaml` - YOLO-style detector
-- `object_detector_detr.yaml` - DETR transformer detector
+- `image/object_detector_yolo.yaml` - YOLO-style detector
+- `image/object_detector_detr.yaml` - DETR transformer detector
 
 ### Segmentation
-- `semantic_segmentation_unet.yaml` - U-Net for medical imaging
-- `instance_segmentation_maskrcnn.yaml` - Mask R-CNN
+- `image/semantic_segmentation_unet.yaml` - U-Net for medical imaging
+- `image/instance_segmentation_maskrcnn.yaml` - Mask R-CNN
 
 ### Time Series
-- `time_series_forecaster.yaml` - Temporal Fusion Transformer
-- `anomaly_detector_autoencoder.yaml` - Variational autoencoder
+- `time_series/time_series_forecaster.yaml` - Temporal Fusion Transformer
+- `time_series/anomaly_detector_autoencoder.yaml` - Variational autoencoder
 
 ### Reinforcement Learning
 - `rl_agent_ppo.yaml` - PPO for continuous control

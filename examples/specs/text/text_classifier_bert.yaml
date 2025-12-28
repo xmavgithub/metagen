@@ -9,7 +9,7 @@
 #   - Parameter count: ~110M
 #
 # Example Usage:
-#   metagen synth examples/specs/text_classifier_bert.yaml --out outputs/bert_sentiment/
+#   metagen synth examples/specs/text/text_classifier_bert.yaml --out outputs/bert_sentiment/
 
 metagen_version: "1.0"
 name: "BERT Sentiment Classifier"

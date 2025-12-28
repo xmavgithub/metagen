@@ -10,7 +10,7 @@ from metagen.synth.codegen import generate_code
 def test_blueprint_dimensions_in_generated_code(tmp_path: Path):
     """Verify generated model.py uses blueprint dimensions."""
     # Load real spec
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
 
     # Generate blueprint
     blueprint = generate_blueprint(spec, tmp_path / "bp", seed=42)
@@ -33,7 +33,7 @@ def test_blueprint_dimensions_in_generated_code(tmp_path: Path):
 
 def test_no_hardcoded_random_dimensions(tmp_path: Path):
     """Verify no hardcoded random dimension values in generated code."""
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     blueprint = generate_blueprint(spec, tmp_path / "bp", seed=42)
     generate_code(spec, tmp_path / "code", blueprint, seed=42)
 
@@ -57,7 +57,7 @@ def test_code_architecture_yaml_consistency(tmp_path: Path):
     """Integration test: architecture.yaml and model.py have consistent dimensions."""
     import yaml
 
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+    spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
     blueprint = generate_blueprint(spec, tmp_path / "bp", seed=42)
     generate_code(spec, tmp_path / "code", blueprint, seed=42)
 

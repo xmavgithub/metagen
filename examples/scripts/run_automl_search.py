@@ -7,7 +7,7 @@ from metagen.specs.loader import load_spec
 
 
 def main() -> None:
-    spec_path = Path("examples/specs/text_llm_8b.yaml")
+    spec_path = Path("examples/specs/text/text_llm_8b.yaml")
     spec, _ = load_spec(spec_path)
 
     engine = ArchitectureSearchEngine(seed=42)

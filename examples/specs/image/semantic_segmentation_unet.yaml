@@ -9,7 +9,7 @@
 #   - Mask resolution: 512
 #
 # Example Usage:
-#   metagen synth examples/specs/semantic_segmentation_unet.yaml --out outputs/unet/
+#   metagen synth examples/specs/image/semantic_segmentation_unet.yaml --out outputs/unet/
 
 metagen_version: "1.0"
 name: "U-Net Semantic Segmentation"

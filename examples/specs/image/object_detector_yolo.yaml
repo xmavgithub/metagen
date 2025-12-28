@@ -9,7 +9,7 @@
 #   - Anchors: 9
 #
 # Example Usage:
-#   metagen synth examples/specs/object_detector_yolo.yaml --out outputs/yolo/
+#   metagen synth examples/specs/image/object_detector_yolo.yaml --out outputs/yolo/
 
 metagen_version: "1.0"
 name: "YOLOv8 COCO Detector"

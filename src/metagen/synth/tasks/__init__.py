@@ -40,7 +40,7 @@ Quick Start:
     >>> from metagen.synth.tasks import get_task_handler
     >>> from metagen.specs.loader import load_spec
     >>>
-    >>> spec = load_spec("examples/specs/image_classifier.yaml")
+    >>> spec = load_spec("examples/specs/image/image_classifier_resnet.yaml")
     >>> handler = get_task_handler(spec)
     >>> if handler:
     ...     print(handler.name)

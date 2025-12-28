@@ -9,7 +9,7 @@
 #   - Object queries: 100
 #
 # Example Usage:
-#   metagen synth examples/specs/object_detector_detr.yaml --out outputs/detr/
+#   metagen synth examples/specs/image/object_detector_detr.yaml --out outputs/detr/
 
 metagen_version: "1.0"
 name: "DETR COCO Detector"

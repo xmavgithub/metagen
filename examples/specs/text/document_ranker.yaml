@@ -9,7 +9,7 @@
 #   - Parameter count: ~110M
 #
 # Example Usage:
-#   metagen synth examples/specs/document_ranker.yaml --out outputs/doc_ranker/
+#   metagen synth examples/specs/text/document_ranker.yaml --out outputs/doc_ranker/
 
 metagen_version: "1.0"
 name: "Cross-Encoder Document Ranker"

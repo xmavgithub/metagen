@@ -30,7 +30,7 @@ from metagen.synth.supplementary_gen import (
 @pytest.fixture
 def sample_spec():
     """Load a sample spec for testing."""
-    spec, _ = load_spec(Path("examples/specs/text_llm_8b.yaml"))
+    spec, _ = load_spec(Path("examples/specs/text/text_llm_8b.yaml"))
     return spec
 
 

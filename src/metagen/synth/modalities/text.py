@@ -19,7 +19,7 @@ Example Usage:
     >>> from metagen.synth.modalities import TextModalityHandler
     >>> from metagen.specs.loader import load_spec
     >>>
-    >>> spec = load_spec("examples/specs/text_llm_8b.yaml")
+    >>> spec = load_spec("examples/specs/text/text_llm_8b.yaml")
     >>> handler = TextModalityHandler()
     >>>
     >>> # Augment blueprint with text-specific parameters

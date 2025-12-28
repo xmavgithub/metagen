@@ -67,8 +67,8 @@ def demo(
     """Run demo synthesis on bundled example specs."""
     example_dir = Path("examples/specs")
     samples = [
-        example_dir / "text_llm_8b.yaml",
-        example_dir / "image_diffusion_sdxl_like.yaml",
+        example_dir / "text" / "text_llm_8b.yaml",
+        example_dir / "image" / "image_diffusion_sdxl_like.yaml",
     ]
     for idx, spec_path in enumerate(samples, start=1):
         run_id = f"demo-{idx}"

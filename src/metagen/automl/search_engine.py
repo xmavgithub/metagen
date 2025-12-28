@@ -71,7 +71,7 @@ class ArchitectureSearchEngine:
 
         Example:
             >>> from metagen.specs.loader import load_spec
-            >>> spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
+            >>> spec, _ = load_spec("examples/specs/text/text_llm_8b.yaml")
             >>> engine = ArchitectureSearchEngine(seed=123)
             >>> result = engine.search(spec, search_budget=5)
             >>> len(result.candidates)

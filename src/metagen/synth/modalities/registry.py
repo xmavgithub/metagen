@@ -20,7 +20,7 @@ Example Usage:
     >>> from metagen.synth.modalities import get_handler
     >>> from metagen.specs.loader import load_spec
     >>>
-    >>> spec = load_spec("examples/specs/text_llm_8b.yaml")
+    >>> spec = load_spec("examples/specs/text/text_llm_8b.yaml")
     >>> handler = get_handler(spec)
     >>> print(handler.name)
     'text'
@@ -139,7 +139,7 @@ def get_handler(spec: ModelSpec) -> ModalityHandler:
         ValueError: If no handler is registered for the spec's modality.
 
     Example:
-        >>> spec = load_spec("examples/specs/text_llm_8b.yaml")
+        >>> spec = load_spec("examples/specs/text/text_llm_8b.yaml")
         >>> handler = get_handler(spec)
         >>> print(handler.name)
         'text'

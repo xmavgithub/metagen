@@ -12,13 +12,13 @@ from metagen.synth.engine import synthesize
 
 # All example specs to test
 EXAMPLE_SPECS = [
-    "text_llm_8b.yaml",
-    "image_diffusion_sdxl_like.yaml",
-    "audio_musicgen_like.yaml",
-    "video_realtime_avatar.yaml",
-    "3d_text_to_mesh.yaml",
-    "edge_tiny_agent.yaml",
-    "multimodal_any_to_any.yaml",
+    "text/text_llm_8b.yaml",
+    "image/image_diffusion_sdxl_like.yaml",
+    "audio/audio_musicgen_like.yaml",
+    "video/video_realtime_avatar.yaml",
+    "3d/3d_text_to_mesh.yaml",
+    "text/edge_tiny_agent.yaml",
+    "multimodal/multimodal_clip.yaml",
 ]
 
 
@@ -70,7 +70,13 @@ class TestFullPipelineIntegration:
             assert (code_dir / "model.py").exists()
             assert (code_dir / "train.py").exists()
 
-    @pytest.mark.parametrize("spec_file", ["text_llm_8b.yaml", "image_diffusion_sdxl_like.yaml"])
+    @pytest.mark.parametrize(
+        "spec_file",
+        [
+            "text/text_llm_8b.yaml",
+            "image/image_diffusion_sdxl_like.yaml",
+        ],
+    )
     def test_paper_generation(self, spec_file: str, examples_dir: Path) -> None:
         """Test paper generation for key modalities."""
         spec_path = examples_dir / spec_file
@@ -93,9 +99,9 @@ class TestDeterminism:
 
     def test_same_seed_same_output(self, examples_dir: Path) -> None:
         """Same spec + same seed = identical outputs."""
-        spec_path = examples_dir / "text_llm_8b.yaml"
+        spec_path = examples_dir / "text" / "text_llm_8b.yaml"
         if not spec_path.exists():
-            pytest.skip("text_llm_8b.yaml not found")
+            pytest.skip("text/text_llm_8b.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output1 = synthesize(spec_path, Path(tmpdir) / "out1", run_id="run1", base_seed=42)
@@ -118,9 +124,9 @@ class TestDeterminism:
 
     def test_different_seed_different_output(self, examples_dir: Path) -> None:
         """Different seeds should produce different outputs."""
-        spec_path = examples_dir / "text_llm_8b.yaml"
+        spec_path = examples_dir / "text" / "text_llm_8b.yaml"
         if not spec_path.exists():
-            pytest.skip("text_llm_8b.yaml not found")
+            pytest.skip("text/text_llm_8b.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output1 = synthesize(spec_path, Path(tmpdir) / "out1", run_id="run1", base_seed=42)
@@ -140,9 +146,9 @@ class TestModalitySpecificIntegration:
 
     def test_text_modality_features(self, examples_dir: Path) -> None:
         """Test text-specific features in synthesis."""
-        spec_path = examples_dir / "text_llm_8b.yaml"
+        spec_path = examples_dir / "text" / "text_llm_8b.yaml"
         if not spec_path.exists():
-            pytest.skip("text_llm_8b.yaml not found")
+            pytest.skip("text/text_llm_8b.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"
@@ -154,9 +160,9 @@ class TestModalitySpecificIntegration:
 
     def test_image_modality_features(self, examples_dir: Path) -> None:
         """Test image-specific features in synthesis."""
-        spec_path = examples_dir / "image_diffusion_sdxl_like.yaml"
+        spec_path = examples_dir / "image" / "image_diffusion_sdxl_like.yaml"
         if not spec_path.exists():
-            pytest.skip("image_diffusion_sdxl_like.yaml not found")
+            pytest.skip("image/image_diffusion_sdxl_like.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"
@@ -168,9 +174,9 @@ class TestModalitySpecificIntegration:
 
     def test_audio_modality_features(self, examples_dir: Path) -> None:
         """Test audio-specific features in synthesis."""
-        spec_path = examples_dir / "audio_musicgen_like.yaml"
+        spec_path = examples_dir / "audio" / "audio_musicgen_like.yaml"
         if not spec_path.exists():
-            pytest.skip("audio_musicgen_like.yaml not found")
+            pytest.skip("audio/audio_musicgen_like.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"
@@ -194,9 +200,9 @@ class TestEdgeCases:
 
     def test_multimodal_spec(self, examples_dir: Path) -> None:
         """Test multimodal spec synthesis."""
-        spec_path = examples_dir / "multimodal_any_to_any.yaml"
+        spec_path = examples_dir / "multimodal" / "multimodal_clip.yaml"
         if not spec_path.exists():
-            pytest.skip("multimodal_any_to_any.yaml not found")
+            pytest.skip("multimodal/multimodal_clip.yaml not found")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "output"
