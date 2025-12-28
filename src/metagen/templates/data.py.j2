@@ -620,6 +620,23 @@ REMOTE_DATASETS = {
         "pair_fields": ("premise", "hypothesis"),
         "label_field": "label",
     },
+    "hf:ms_marco": {
+        "provider": "hf",
+        "path": "ms_marco",
+        "name": "passage",
+        "category": "text_pair",
+        "description": "MS MARCO passage ranking pairs.",
+        "pair_fields": ("query", "passage"),
+        "label_field": "label",
+    },
+    "hf:natural_questions": {
+        "provider": "hf",
+        "path": "natural_questions",
+        "category": "text_pair",
+        "description": "Natural Questions query-document pairs.",
+        "pair_fields": ("question", "document"),
+        "label_field": "label",
+    },
     "hf:mnist": {
         "provider": "hf",
         "path": "mnist",
@@ -834,7 +851,13 @@ DATASET_GROUPS = {
         "hf:yelp_polarity",
         "hf:dbpedia_14",
     ],
-    "text_pair": ["hf:glue/qqp", "hf:glue/mrpc", "hf:snli"],
+    "text_pair": [
+        "hf:glue/qqp",
+        "hf:glue/mrpc",
+        "hf:snli",
+        "hf:ms_marco",
+        "hf:natural_questions",
+    ],
     "text_regression": ["hf:glue/stsb"],
     "image_classification": [
         "hf:mnist",

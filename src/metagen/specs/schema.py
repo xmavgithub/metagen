@@ -42,7 +42,6 @@ UNSUPPORTED_MODALITIES = {"taste", "smell", "vibes"}
 # Valid task types for task-based routing
 VALID_TASK_TYPES = {
     # Existing
-    "generation",
     # Phase 1: Classification & Regression
     "classification",
     "regression",
@@ -54,10 +53,8 @@ VALID_TASK_TYPES = {
     "semantic_segmentation",
     "panoptic_segmentation",
     # Phase 3: Sequence & Time Series
-    "sequence_labeling",
     "time_series_forecast",
     "anomaly_detection",
-    "speech_recognition",
     # Phase 4: Reinforcement Learning
     "policy_gradient",
     "value_based",

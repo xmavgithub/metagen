@@ -28,9 +28,10 @@ class SyntheticDetectionDataset(Dataset):
 
     def __getitem__(self, idx: int):
         if not torch:
-            return []
+            raise RuntimeError("torch is required for detection datasets.")
         image = torch.randn(3, self.image_size, self.image_size)
         boxes = torch.rand(self.num_boxes, 4)
+        boxes[:, 2:] = boxes[:, 2:].clamp(min=boxes[:, :2] + 0.01)
         labels = torch.randint(0, self.num_classes, (self.num_boxes,))
         return image, {"boxes": boxes, "labels": labels}
 

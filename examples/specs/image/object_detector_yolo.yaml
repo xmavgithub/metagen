@@ -6,7 +6,7 @@
 #   - Image size: 640x640
 #   - Architecture: CNN (YOLOv8-like)
 #   - Number of classes: 80 (COCO)
-#   - Anchors: 9
+#   - Anchors: anchor-free
 #
 # Example Usage:
 #   metagen synth examples/specs/image/object_detector_yolo.yaml --out outputs/yolo/
@@ -24,7 +24,6 @@ task:
   type: object_detection
   domain: coco
   num_classes: 80
-  num_anchors: 9
 
 constraints:
   device: edge

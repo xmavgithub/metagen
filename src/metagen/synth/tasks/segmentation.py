@@ -81,7 +81,7 @@ class BaseSegmentationTaskHandler(TaskHandler):
         """Add segmentation-specific parameters to blueprint."""
         num_classes = spec.task.num_classes
         if num_classes is None:
-            domain = spec.task.domain.lower()
+            domain = (spec.task.domain or "generic").lower()
             num_classes = DEFAULT_NUM_CLASSES.get(domain, DEFAULT_NUM_CLASSES["generic"])
             logger.debug(f"Using default num_classes={num_classes} for domain '{domain}'")
 
@@ -102,10 +102,14 @@ class BaseSegmentationTaskHandler(TaskHandler):
     ) -> dict[str, Any]:
         """Define segmentation head architecture."""
         hidden_size = blueprint.dims["hidden_size"]
+        task = getattr(spec, "task", None)
+        task_num_classes = getattr(task, "num_classes", None) if task else None
+        task_domain = getattr(task, "domain", None) if task else None
+        domain = (task_domain or "generic").lower()
         num_classes = (
             blueprint.num_classes
-            or spec.task.num_classes
-            or DEFAULT_NUM_CLASSES.get(spec.task.domain.lower(), DEFAULT_NUM_CLASSES["generic"])
+            or task_num_classes
+            or DEFAULT_NUM_CLASSES.get(domain, DEFAULT_NUM_CLASSES["generic"])
         )
         mask_resolution = (
             blueprint.mask_resolution
