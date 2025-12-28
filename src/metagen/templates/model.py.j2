@@ -99,6 +99,13 @@ class MetaGenModel(nn.Module if torch else object):
                 mask_resolution={{ head_config.get("mask_resolution", blueprint.image_size or 128) }},
                 dropout={{ head_config.get("dropout", 0.1) }},
             )
+            {% elif task_components.head_type == "time_series_head" %}
+            self.output_head = TimeSeriesHead(
+                hidden_dim=hidden_size,
+                horizon={{ head_config.get("horizon", blueprint.horizon or 1) }},
+                output_dim={{ head_config.get("output_dim", blueprint.num_outputs or 1) }},
+                dropout={{ head_config.get("dropout", 0.1) }},
+            )
             {% else %}
             output_dim = {{ head_config.get("num_outputs", head_config.get("num_classes", 1)) }}
             self.output_head = nn.Linear(hidden_size, output_dim)

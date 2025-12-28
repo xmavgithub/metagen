@@ -35,6 +35,7 @@ def generate_code(spec: ModelSpec, out_dir: Path, blueprint: BlueprintState, see
     task_handler = get_task_handler(spec)
     task_components = None
     if task_handler:
+        blueprint = task_handler.augment_blueprint(spec, blueprint, seed)
         task_components = task_handler.generate_components(spec, blueprint, seed)
 
     # Common render context

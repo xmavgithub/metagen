@@ -23,6 +23,7 @@ import pytest
 
 from metagen.synth.architecture import BlueprintState
 from metagen.synth.tasks import (
+    AnomalyDetectionTaskHandler,
     ClassificationTaskHandler,
     DetectionTaskHandler,
     EmbeddingTaskHandler,
@@ -31,6 +32,7 @@ from metagen.synth.tasks import (
     RankingTaskHandler,
     RegressionTaskHandler,
     SemanticSegmentationTaskHandler,
+    TimeSeriesForecastTaskHandler,
     get_task_handler,
     list_registered_task_types,
 )
@@ -125,6 +127,12 @@ class TestHandlerRegistration:
         assert "semantic_segmentation" in task_types
         assert "instance_segmentation" in task_types
         assert "panoptic_segmentation" in task_types
+
+    def test_time_series_registered(self) -> None:
+        """Test that time series handlers are registered."""
+        task_types = list_registered_task_types()
+        assert "time_series_forecast" in task_types
+        assert "anomaly_detection" in task_types
 
 
 class TestClassificationTaskHandler:
@@ -612,6 +620,102 @@ class TestSegmentationTaskHandlers:
         metrics = handler.get_metrics(spec)
 
         assert "PQ" in metrics
+
+
+class TestTimeSeriesTaskHandlers:
+    """Tests for time series task handlers."""
+
+    def test_forecast_name(self) -> None:
+        """Test time series forecast name."""
+        handler = TimeSeriesForecastTaskHandler()
+        assert handler.name == "time_series_forecast"
+
+    def test_supported_modalities(self) -> None:
+        """Test supported modalities for time series."""
+        handler = TimeSeriesForecastTaskHandler()
+        assert "time_series" in handler.supported_modalities
+        assert "tabular" in handler.supported_modalities
+
+    def test_augment_blueprint_defaults(self) -> None:
+        """Test time series defaults for horizon/lookback."""
+        handler = TimeSeriesForecastTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["time_series"], outputs=["time_series"]),
+            task=MockTask(
+                type="time_series_forecast",
+                horizon=None,
+                lookback=None,
+                num_outputs=None,
+            ),
+        )
+        blueprint = make_blueprint()
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.horizon == 1
+        assert augmented.lookback == 30
+        assert augmented.num_outputs == 1
+
+    def test_get_head_architecture(self) -> None:
+        """Test time series head architecture."""
+        handler = TimeSeriesForecastTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["time_series"], outputs=["time_series"]),
+            task=MockTask(type="time_series_forecast", horizon=12, lookback=48, num_outputs=3),
+        )
+        blueprint = make_blueprint()
+        blueprint = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "time_series_head"
+        assert head["horizon"] == 12
+        assert head["output_dim"] == 3
+
+    def test_forecast_metrics(self) -> None:
+        """Test forecast metrics."""
+        handler = TimeSeriesForecastTaskHandler()
+        spec = MockSpec(task=MockTask(type="time_series_forecast"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "mse" in metrics
+        assert "smape" in metrics
+
+    def test_anomaly_metrics(self) -> None:
+        """Test anomaly detection metrics."""
+        handler = AnomalyDetectionTaskHandler()
+        spec = MockSpec(task=MockTask(type="anomaly_detection"))
+
+        metrics = handler.get_metrics(spec)
+
+        assert "roc_auc" in metrics
+        assert "f1" in metrics
+
+    def test_anomaly_defaults(self) -> None:
+        """Test anomaly detection uses lookback for horizon by default."""
+        handler = AnomalyDetectionTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["time_series"], outputs=["time_series"]),
+            task=MockTask(type="anomaly_detection", lookback=60, horizon=None),
+        )
+        blueprint = make_blueprint()
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.lookback == 60
+        assert augmented.horizon == 60
+
+    def test_get_task_handler_returns_forecast(self) -> None:
+        """Test get_task_handler returns time series handler."""
+        spec = MockSpec(
+            modality=MockModality(inputs=["time_series"], outputs=["time_series"]),
+            task=MockTask(type="time_series_forecast"),
+        )
+
+        handler = get_task_handler(spec)
+
+        assert isinstance(handler, TimeSeriesForecastTaskHandler)
 
 
 class TestGenerateComponents:

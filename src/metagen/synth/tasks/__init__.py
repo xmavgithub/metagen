@@ -81,6 +81,10 @@ from metagen.synth.tasks.segmentation import (
     PanopticSegmentationTaskHandler,
     SemanticSegmentationTaskHandler,
 )
+from metagen.synth.tasks.time_series import (
+    AnomalyDetectionTaskHandler,
+    TimeSeriesForecastTaskHandler,
+)
 
 __all__ = [
     # Base classes
@@ -103,4 +107,7 @@ __all__ = [
     "SemanticSegmentationTaskHandler",
     "InstanceSegmentationTaskHandler",
     "PanopticSegmentationTaskHandler",
+    # Phase 4 handlers
+    "TimeSeriesForecastTaskHandler",
+    "AnomalyDetectionTaskHandler",
 ]
