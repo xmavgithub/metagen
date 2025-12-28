@@ -138,7 +138,7 @@ def main() -> int:
         print(
             f"batch={batch_size} steps={total_steps} "
             f"sec={elapsed:.2f} steps/s={steps_per_sec:.2f} "
-            f"tok/s={tokens_per_sec/1e6:.2f}M"
+            f"tok/s={tokens_per_sec / 1e6:.2f}M"
         )
 
     return 0

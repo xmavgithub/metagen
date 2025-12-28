@@ -11,10 +11,10 @@ from metagen.synth.codegen import generate_code
 
 def test_train_raises_value_error_missing_targets(tmp_path: Path) -> None:
     """Verify that generated train.py raises ValueError if targets are missing."""
-    
+
     # 1. Generate code for a vocab-based model
     spec, _ = load_spec("examples/specs/text_llm_8b.yaml")
-    
+
     # Tiny blueprint
     blueprint = BlueprintState(
         dims={"hidden_size": 32, "layers": 1, "heads": 2},
@@ -24,15 +24,14 @@ def test_train_raises_value_error_missing_targets(tmp_path: Path) -> None:
         components=(),
         seed=42,
     )
-    
+
     code_dir = tmp_path / "code"
     generate_code(spec, code_dir, blueprint, seed=42)
-    
+
     # 2. Create a test script that imports the generated train function
     # and calls it with a dummy data loader that yields (x, None) and ensures AR logic fails
     # effectively by passing 1D x which won't trigger the AR shifter
-    
-    
+
     # OVERWRITE model.py with a tolerant mock that accepts 1D inputs
     # so we can bypass AR shifting but still run forward()
     model_file = code_dir / "model.py"
@@ -89,19 +88,20 @@ if __name__ == "__main__":
     res = subprocess.run(
         [sys.executable, str(runner_script)], cwd=code_dir, capture_output=True, text=True
     )
-    
+
     print("STDOUT:", res.stdout)
     print("STDERR:", res.stderr)
-    
+
     assert res.returncode == 0, "Test runner failed"
     assert "SUCCESS" in res.stdout
 
+
 def test_train_raises_value_error_missing_targets_no_vocab(tmp_path: Path) -> None:
     """Verify that generated train.py raises ValueError if targets are missing (NO vocab)."""
-    
+
     # 1. Generate code for a NO-vocab model (e.g. image)
-    spec, _ = load_spec("examples/specs/text_llm_8b.yaml") # Reuse spec but force blueprint
-    
+    spec, _ = load_spec("examples/specs/text_llm_8b.yaml")  # Reuse spec but force blueprint
+
     # Tiny blueprint NO VOCAB
     blueprint = BlueprintState(
         dims={"hidden_size": 32, "layers": 1, "heads": 2},
@@ -111,10 +111,10 @@ def test_train_raises_value_error_missing_targets_no_vocab(tmp_path: Path) -> No
         components=(),
         seed=42,
     )
-    
+
     code_dir = tmp_path / "code_novocab"
     generate_code(spec, code_dir, blueprint, seed=42)
-    
+
     # 2. Runner script
     runner_script = code_dir / "run_test.py"
     runner_script.write_text("""
@@ -161,9 +161,9 @@ if __name__ == "__main__":
     res = subprocess.run(
         [sys.executable, str(runner_script)], cwd=code_dir, capture_output=True, text=True
     )
-    
+
     print("STDOUT:", res.stdout)
     print("STDERR:", res.stderr)
-    
+
     assert res.returncode == 0, "Test runner failed"
     assert "SUCCESS" in res.stdout

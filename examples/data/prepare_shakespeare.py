@@ -13,6 +13,7 @@ This will create:
     - train.bin (tokenized training data, 90%)
     - val.bin (tokenized validation data, 10%)
 """
+
 import os
 
 import numpy as np
@@ -23,7 +24,9 @@ import tiktoken
 input_file_path = os.path.join(os.path.dirname(__file__), "input.txt")
 if not os.path.exists(input_file_path):
     print("Downloading TinyShakespeare dataset...")
-    data_url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    data_url = (
+        "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    )
     try:
         response = requests.get(data_url, timeout=10)
         response.raise_for_status()
