@@ -31,6 +31,7 @@ constraints:
   latency: batch
   parameter_budget:
     max: "50M"
+  image_size: 1024
 
 architecture:
   family: cnn
