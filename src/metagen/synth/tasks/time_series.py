@@ -51,7 +51,7 @@ class BaseTimeSeriesTaskHandler(TaskHandler):
     """Shared implementation for time series task handlers."""
 
     task_type: str = "time_series_forecast"
-    metrics: list[str] = ["mse", "rmse", "mae", "mape", "smape"]
+    metrics: tuple[str, ...] = ("mse", "rmse", "mae", "mape", "smape")
     loss_type: str = "mse"
     loss_fragment: str = "losses/mse_loss.py.j2"
 
@@ -130,7 +130,7 @@ class TimeSeriesForecastTaskHandler(BaseTimeSeriesTaskHandler):
     """Task handler for time series forecasting."""
 
     task_type = "time_series_forecast"
-    metrics = ["mse", "rmse", "mae", "mape", "smape"]
+    metrics = ("mse", "rmse", "mae", "mape", "smape")
     loss_type = "mse"
     loss_fragment = "losses/mse_loss.py.j2"
 
@@ -140,7 +140,7 @@ class AnomalyDetectionTaskHandler(BaseTimeSeriesTaskHandler):
     """Task handler for time series anomaly detection."""
 
     task_type = "anomaly_detection"
-    metrics = ["roc_auc", "pr_auc", "f1", "precision", "recall"]
+    metrics = ("roc_auc", "pr_auc", "f1", "precision", "recall")
     loss_type = "mse"
     loss_fragment = "losses/reconstruction.py.j2"
 
