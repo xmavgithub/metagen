@@ -13,6 +13,7 @@ This will create:
     - train.bin (tokenized training data, 90%)
     - val.bin (tokenized validation data, 10%)
 """
+
 import os
 
 import numpy as np
@@ -23,23 +24,25 @@ import tiktoken
 input_file_path = os.path.join(os.path.dirname(__file__), "input.txt")
 if not os.path.exists(input_file_path):
     print("Downloading TinyShakespeare dataset...")
-    data_url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    data_url = (
+        "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    )
     try:
         response = requests.get(data_url, timeout=10)
         response.raise_for_status()
     except requests.Timeout:
         print("Error: Download timed out after 10 seconds.")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     except requests.RequestException as exc:
         print(f"Error: Failed to download dataset: {exc}")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     with open(input_file_path, "w", encoding="utf-8") as f:
         f.write(response.text)
     print(f"Saved to {input_file_path}")
 else:
     print(f"Dataset already exists at {input_file_path}")
 
-with open(input_file_path, "r", encoding="utf-8") as f:
+with open(input_file_path, encoding="utf-8") as f:
     data = f.read()
 
 n = len(data)

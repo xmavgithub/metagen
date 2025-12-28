@@ -48,6 +48,10 @@ class MetaGenModel(nn.Module if torch else object):
                 for _ in range(layers)
             ])
             self.norm = nn.LayerNorm(hidden_size)
+            
+            {% if blueprint.vocab_size %}
+            self.output_head = nn.Linear(hidden_size, {{ blueprint.vocab_size }}, bias=False)
+            {% endif %}
         else:
             self.layers = []
             self.norm = None
@@ -63,4 +67,8 @@ class MetaGenModel(nn.Module if torch else object):
 
         for layer in self.layers:
             x = layer(x)
-        return self.norm(x)
+        x = self.norm(x)
+        {% if blueprint.vocab_size %}
+        x = self.output_head(x)
+        {% endif %}
+        return x
