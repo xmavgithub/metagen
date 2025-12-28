@@ -1,0 +1,33 @@
+# MetaGen Docker Compose
+# Usage: docker compose run metagen <command>
+
+services:
+  metagen:
+    build: .
+    image: metagen:latest
+    volumes:
+      # Mount local outputs directory
+      - ./outputs:/app/outputs
+      # Mount custom specs (optional)
+      - ./examples/specs:/app/specs:ro
+    working_dir: /app
+
+    # Override entrypoint for interactive use
+    # docker compose run metagen synth /app/specs/text_llm_8b.yaml --out /app/outputs/
+
+  # Convenience service for demo
+  demo:
+    build: .
+    image: metagen:latest
+    volumes:
+      - ./outputs:/app/outputs
+    command: ["demo"]
+
+  # Convenience service for paper generation
+  paper:
+    build: .
+    image: metagen:latest
+    volumes:
+      - ./outputs:/app/outputs
+      - ./examples/specs:/app/specs:ro
+    command: ["paper", "/app/specs/text_llm_8b.yaml", "--out", "/app/outputs/paper"]

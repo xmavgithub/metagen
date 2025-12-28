@@ -60,6 +60,26 @@ pip install -e .
 metagen demo
 ```
 
+### Docker
+
+```bash
+# Build the image
+docker build -t metagen .
+
+# Run demo
+docker run -v $(pwd)/outputs:/app/outputs metagen demo
+
+# Synthesize from spec
+docker run -v $(pwd)/outputs:/app/outputs metagen synth examples/specs/text_llm_8b.yaml --out /app/outputs/
+
+# Generate paper (includes LaTeX)
+docker run -v $(pwd)/outputs:/app/outputs metagen paper examples/specs/text_llm_8b.yaml --out /app/outputs/paper
+
+# Or use docker compose
+docker compose run metagen synth examples/specs/text_llm_8b.yaml --out /app/outputs/
+docker compose run demo
+```
+
 ### Your First Synthesis
 
 ```bash
