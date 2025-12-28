@@ -121,7 +121,7 @@ def main() -> int:
         _sync_device(torch, device)
         start = time.perf_counter()
         seq_len = None
-        for step in range(total_steps):
+        for _ in range(total_steps):
             try:
                 batch = next(it)
             except StopIteration:

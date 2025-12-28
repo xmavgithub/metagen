@@ -29,17 +29,17 @@ if not os.path.exists(input_file_path):
         response.raise_for_status()
     except requests.Timeout:
         print("Error: Download timed out after 10 seconds.")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     except requests.RequestException as exc:
         print(f"Error: Failed to download dataset: {exc}")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     with open(input_file_path, "w", encoding="utf-8") as f:
         f.write(response.text)
     print(f"Saved to {input_file_path}")
 else:
     print(f"Dataset already exists at {input_file_path}")
 
-with open(input_file_path, "r", encoding="utf-8") as f:
+with open(input_file_path, encoding="utf-8") as f:
     data = f.read()
 
 n = len(data)

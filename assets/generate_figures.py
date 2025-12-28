@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
 
 # Output directory
 FIGURES_DIR = Path(__file__).parent / "figures"
@@ -24,7 +25,7 @@ def generate_pareto_front():
     # Generate candidates
     n_candidates = 50
     params = np.random.uniform(1, 15, n_candidates)
-    latency = 50 + params * 30 + np.random.normal(0, 20, n_candidates)
+    # latency = 50 + params * 30 + np.random.normal(0, 20, n_candidates)
     score = 0.5 + 0.3 * np.log(params) + np.random.normal(0, 0.05, n_candidates)
 
     # Find Pareto front (simplified)
@@ -130,7 +131,7 @@ def generate_ablation():
     bars = ax.barh(components, scores, color=colors, edgecolor='white', linewidth=1.5)
 
     # Add value labels
-    for bar, score in zip(bars, scores):
+    for bar, score in zip(bars, scores, strict=False):
         ax.text(score + 0.01, bar.get_y() + bar.get_height()/2,
                 f'{score:.3f}', va='center', fontsize=10)
 

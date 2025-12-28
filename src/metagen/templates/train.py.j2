@@ -55,8 +55,12 @@ def train(
     # Optimizer
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     
-    # Loss function (fallback)
+    # Loss function
+    {% if blueprint.vocab_size %}
+    criterion = nn.CrossEntropyLoss()
+    {% else %}
     criterion = nn.MSELoss()
+    {% endif %}
 
     start_time = time.time()
     
@@ -74,27 +78,40 @@ def train(
             # Handle data structure
             if isinstance(batch, (list, tuple)):
                 x = batch[0].to(device)
-                # y = batch[1].to(device) if len(batch) > 1 else None
+                y = batch[1].to(device) if len(batch) > 1 else None
             elif isinstance(batch, torch.Tensor):
                 x = batch.to(device)
+                y = None
             else:
                 # Fallback for synthetic/unknown
                 continue
+                
+            # Auto-regressive target shifting
+            {% if blueprint.vocab_size %}
+            if y is None and x.dim() == 2:
+                # Assuming x is [batch, seq_len] indices
+                y = x[:, 1:].contiguous()
+                x = x[:, :-1].contiguous()
+            {% endif %}
                 
             # Forward pass
             output = model(x)
             
             # Loss handling
-            # If model returns tuple/object with loss, use it.
-            # Otherwise compute generic loss (dummy for now if no head)
             if isinstance(output, (tuple, list)) and len(output) > 1:
                 loss = output[0]  # Assume first output is loss if tuple
             elif hasattr(output, 'loss'):
                 loss = output.loss
             else:
-                # Fallback: simple L2 reduction for gradient signal
-                # In real scenario, we'd Project to Vocab and use CrossEntropy
-                loss = output.pow(2).mean()
+                {% if blueprint.vocab_size %}
+                # Reshape for CrossEntropy: [B*T, V], [B*T]
+                if y is not None:
+                    loss = criterion(output.view(-1, output.size(-1)), y.view(-1))
+                else:
+                    loss = output.sum() * 0.0
+                {% else %}
+                loss = criterion(output, y) if y is not None else output.pow(2).mean()
+                {% endif %}
             
             # Backward
             loss.backward()
