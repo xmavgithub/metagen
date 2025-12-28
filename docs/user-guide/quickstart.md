@@ -120,6 +120,13 @@ python outputs/run-*/code/train.py \
     --data examples/data/train.bin \
     --epochs 1 \
     --batch-size 4
+
+# Or use bundled sample data (auto-picks for the task)
+python outputs/run-*/code/train.py \
+    --sample-data auto \
+    --sample-size 256 \
+    --epochs 1 \
+    --batch-size 4
 ```
 
 ### Create Your Own Spec

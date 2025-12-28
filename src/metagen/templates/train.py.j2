@@ -10,6 +10,30 @@ try:
 except ImportError:
     torch = None
 
+if torch:
+    {% if task_components and task_components.loss_type == "detection_loss" %}
+    from model import detection_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type == "dice_loss" %}
+    from model import dice_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type == "contrastive_loss" %}
+    from model import contrastive_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type in ["policy_gradient_loss", "actor_critic_loss"] %}
+    from model import policy_gradient_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type in ["td_loss", "actor_critic_loss"] %}
+    from model import td_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type == "actor_critic_loss" %}
+    from model import actor_critic_loss
+    {% endif %}
+    {% if task_components and task_components.loss_type == "model_based_loss" %}
+    from model import model_based_loss
+    {% endif %}
+    pass
+
 try:
     from tqdm import tqdm
 except ImportError:
@@ -52,6 +76,15 @@ def train(
     model = model.to(device)
     model.train()
 
+    def _to_device(value):
+        if isinstance(value, torch.Tensor):
+            return value.to(device)
+        if isinstance(value, dict):
+            return {k: _to_device(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return type(value)(_to_device(v) for v in value)
+        return value
+
     # Optimizer
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     
@@ -91,14 +124,17 @@ def train(
             
             # Handle data structure
             if isinstance(batch, (list, tuple)):
-                x = batch[0].to(device)
-                y = batch[1].to(device) if len(batch) > 1 else None
+                x = batch[0]
+                y = batch[1] if len(batch) > 1 else None
             elif isinstance(batch, torch.Tensor):
-                x = batch.to(device)
+                x = batch
                 y = None
             else:
                 # Fallback for synthetic/unknown
                 continue
+
+            x = _to_device(x)
+            y = _to_device(y) if y is not None else None
                 
             # Auto-regressive target shifting
             {% if blueprint.vocab_size %}
@@ -112,15 +148,117 @@ def train(
             output = model(x)
             
             # Loss handling
+            {% if task_components and task_components.loss_type == "detection_loss" %}
+            if y is None:
+                raise ValueError("Detection tasks require target labels and boxes.")
+            if not isinstance(output, dict):
+                raise ValueError("Detection output should be a dict with pred_logits/pred_boxes.")
+            if isinstance(y, dict):
+                target_labels = y.get("labels")
+                target_boxes = y.get("boxes")
+            elif isinstance(y, (list, tuple)) and len(y) >= 2:
+                target_labels, target_boxes = y[0], y[1]
+            else:
+                raise ValueError("Detection targets must include labels and boxes.")
+            loss = detection_loss(
+                output["pred_logits"],
+                output["pred_boxes"],
+                target_labels,
+                target_boxes,
+            )
+            {% elif task_components and task_components.loss_type == "dice_loss" %}
+            if y is None:
+                raise ValueError("Segmentation tasks require target masks.")
+            loss = dice_loss(output, y)
+            {% elif task_components and task_components.loss_type == "contrastive_loss" %}
+            if y is None:
+                raise ValueError("Contrastive tasks require paired inputs.")
+            emb_a = output
+            emb_b = model(y)
+            loss = contrastive_loss(emb_a, emb_b)
+            {% elif task_components and task_components.loss_type == "pairwise_ranking_loss" %}
+            if y is None:
+                raise ValueError("Ranking tasks require paired inputs.")
+            score_pos = output
+            score_neg = model(y)
+            pos = score_pos.view(score_pos.size(0), -1).mean(dim=1)
+            neg = score_neg.view(score_neg.size(0), -1).mean(dim=1)
+            margin = 1.0
+            loss = torch.clamp(margin - (pos - neg), min=0).mean()
+            {% elif task_components and task_components.loss_type == "policy_gradient_loss" %}
+            if y is None:
+                raise ValueError("Policy gradient tasks require actions and advantages.")
+            if isinstance(y, dict):
+                actions = y.get("actions")
+                advantages = y.get("advantages")
+            elif isinstance(y, (list, tuple)) and len(y) >= 2:
+                actions, advantages = y[0], y[1]
+            else:
+                raise ValueError("Policy gradient targets must include actions and advantages.")
+            logits = output[0] if isinstance(output, (tuple, list)) else output
+            {% if (blueprint.action_space or spec.task.action_space or "discrete") == "continuous" %}
+            loss = nn.MSELoss()(logits, actions)
+            {% else %}
+            loss = policy_gradient_loss(logits, actions, advantages)
+            {% endif %}
+            {% elif task_components and task_components.loss_type == "td_loss" %}
+            if y is None:
+                raise ValueError("Value-based tasks require target values.")
+            targets = y.get("targets") if isinstance(y, dict) else y
+            loss = td_loss(output, targets)
+            {% elif task_components and task_components.loss_type == "actor_critic_loss" %}
+            if y is None:
+                raise ValueError("Actor-critic tasks require actions and returns.")
+            if isinstance(y, dict):
+                actions = y.get("actions")
+                advantages = y.get("advantages")
+                returns = y.get("returns")
+            elif isinstance(y, (list, tuple)) and len(y) >= 3:
+                actions, advantages, returns = y[0], y[1], y[2]
+            else:
+                raise ValueError("Actor-critic targets must include actions, advantages, returns.")
+            if isinstance(output, (tuple, list)):
+                if len(output) == 3:
+                    policy_out, _log_std, value = output
+                else:
+                    policy_out, value = output
+            else:
+                raise ValueError("Actor-critic output should include policy and value heads.")
+            {% if (blueprint.action_space or spec.task.action_space or "discrete") == "continuous" %}
+            policy_loss = nn.MSELoss()(policy_out, actions)
+            entropy = torch.zeros((), device=policy_out.device)
+            {% else %}
+            policy_loss = policy_gradient_loss(policy_out, actions, advantages)
+            log_probs = torch.log_softmax(policy_out, dim=-1)
+            entropy = -(log_probs * torch.exp(log_probs)).sum(dim=-1).mean()
+            {% endif %}
+            value = value.view(value.size(0), -1).squeeze(-1)
+            returns = returns.view(returns.size(0), -1).squeeze(-1)
+            value_loss = td_loss(value, returns)
+            loss = actor_critic_loss(policy_loss, value_loss, entropy)
+            {% elif task_components and task_components.loss_type == "model_based_loss" %}
+            if y is None:
+                raise ValueError("Model-based tasks require target next-state tensors.")
+            if not isinstance(output, dict) or "next_state" not in output:
+                raise ValueError("Model-based output should include next_state.")
+            target_state = y.get("next_state") if isinstance(y, dict) else y
+            loss = model_based_loss(output["next_state"], target_state)
+            {% else %}
             if isinstance(output, (tuple, list)) and len(output) > 1:
                 loss = output[0]  # Assume first output is loss if tuple
-            elif hasattr(output, 'loss'):
+            elif hasattr(output, "loss"):
                 loss = output.loss
             else:
                 {% if task_components and task_components.loss_type %}
                 # Task-specific loss calculation
                 if y is not None:
+                    {% if task_components.head_type == "node_classification_head" %}
+                    # Node classification expects logits as (batch, classes, nodes)
+                    logits = output.permute(0, 2, 1)
+                    loss = criterion(logits, y)
+                    {% else %}
                     loss = criterion(output, y)
+                    {% endif %}
                 else:
                     raise ValueError(f"Task {{ task_components.head_type }} requires targets (y).")
                 {% elif blueprint.vocab_size %}
@@ -138,6 +276,7 @@ def train(
                     # But to be explicit and safe:
                     raise ValueError("Model requires targets (y) for training. If self-supervised, ensure data loader yields targets.")
                 {% endif %}
+            {% endif %}
             
             # Backward
             loss.backward()
@@ -189,10 +328,27 @@ if __name__ == "__main__":
     sys.path.append(script_dir)
     
     from model import MetaGenModel
-    from data import load_data
+    from data import available_sample_data, load_data
     
     parser = argparse.ArgumentParser(description="Train MetaGen model")
     parser.add_argument("--data", type=str, default=None, help="Path to training data (.bin or .txt)")
+    parser.add_argument(
+        "--sample-data",
+        type=str,
+        default=None,
+        help="Use a bundled sample dataset by name (auto, text_shakespeare, synthetic_*).",
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=256,
+        help="Max samples to use for sample datasets.",
+    )
+    parser.add_argument(
+        "--list-sample-data",
+        action="store_true",
+        help="List available sample dataset names and exit.",
+    )
     parser.add_argument("--epochs", type=int, default=1, help="Number of epochs")
     parser.add_argument("--batch-size", type=int, default=4, help="Batch size")
     parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
@@ -221,6 +377,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     
+    if args.list_sample_data:
+        print("Available sample datasets:")
+        for name in available_sample_data():
+            print(f"  - {name}")
+        sys.exit(0)
+
     print("Initializing model...")
     model = MetaGenModel()
     
@@ -246,7 +408,13 @@ if __name__ == "__main__":
 
         loader = _prototype_loader()
     else:
-        loader = load_data(data_path=args.data, batch_size=args.batch_size)
+        sample_size = args.sample_size if (args.sample_data or not args.data) else None
+        loader = load_data(
+            data_path=args.data,
+            batch_size=args.batch_size,
+            sample_data=args.sample_data,
+            sample_size=sample_size,
+        )
     
     print("Starting training...")
     try:

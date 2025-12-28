@@ -208,6 +208,13 @@ python outputs/<run_id>/code/train.py \
     --data examples/data/train.bin \
     --epochs 1 \
     --batch-size 4
+
+# Or use a bundled sample dataset (auto-picks one for the task)
+python outputs/<run_id>/code/train.py \
+    --sample-data auto \
+    --sample-size 256 \
+    --epochs 1 \
+    --batch-size 4
 ```
 
 ---
