@@ -78,15 +78,14 @@ modality:
 
 ```yaml
 task:
-  type: "generation"
+  type: "classification"
   domain: "text"
 ```
 
 **Task types:**
-- **Core**: `generation`
 - **Classification/Regression**: `classification`, `regression`, `embedding`, `ranking`
 - **Detection/Segmentation**: `object_detection`, `instance_segmentation`, `semantic_segmentation`, `panoptic_segmentation`
-- **Time Series**: `time_series_forecast`, `anomaly_detection`, `sequence_labeling`, `speech_recognition`
+- **Time Series**: `time_series_forecast`, `anomaly_detection`
 - **Reinforcement Learning**: `policy_gradient`, `value_based`, `actor_critic`, `model_based`
 - **Graph**: `node_classification`, `link_prediction`, `graph_classification`, `recommendation`
 

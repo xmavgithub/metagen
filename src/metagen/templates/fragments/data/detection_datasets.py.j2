@@ -17,11 +17,13 @@ class SyntheticDetectionDataset(Dataset):
         image_size: int = {{ blueprint.image_size or 224 }},
         num_classes: int = {{ blueprint.num_classes or 80 }},
         num_boxes: int = 10,
+        seed: int = 0,
     ) -> None:
         self.size = size
         self.image_size = image_size
         self.num_classes = num_classes
         self.num_boxes = num_boxes
+        self.seed = seed
 
     def __len__(self) -> int:
         return self.size
@@ -29,10 +31,12 @@ class SyntheticDetectionDataset(Dataset):
     def __getitem__(self, idx: int):
         if not torch:
             raise RuntimeError("torch is required for detection datasets.")
-        image = torch.randn(3, self.image_size, self.image_size)
-        boxes = torch.rand(self.num_boxes, 4)
+        generator = torch.Generator()
+        generator.manual_seed(self.seed + idx)
+        image = torch.randn(3, self.image_size, self.image_size, generator=generator)
+        boxes = torch.rand(self.num_boxes, 4, generator=generator)
         boxes[:, 2:] = boxes[:, 2:].clamp(min=boxes[:, :2] + 0.01)
-        labels = torch.randint(0, self.num_classes, (self.num_boxes,))
+        labels = torch.randint(0, self.num_classes, (self.num_boxes,), generator=generator)
         return image, {"boxes": boxes, "labels": labels}
 
 
