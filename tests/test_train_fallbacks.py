@@ -126,7 +126,7 @@ from model import MetaGenModel
 # Mock data loader yielding (x, None) explicitly
 def bad_loader():
     x = torch.randn(4, 32)
-    yield x # y is None implicity in train fallback logic handling tuple
+    yield x  # y is None implicitly in train fallback logic handling tuple
     
     # Wait, train.py logic for tensor yield is:
     # elif isinstance(batch, torch.Tensor):

@@ -116,7 +116,7 @@ def train(
                     # For continuous outputs, if specific targets aren't provided,
                     # we often use reconstruction (MSE against input) or similar self-supervised objective.
                     # But to be explicit and safe:
-                     raise ValueError("Model requires targets (y) for training. If self-supervised, ensure data loader yields targets.")
+                    raise ValueError("Model requires targets (y) for training. If self-supervised, ensure data loader yields targets.")
                 {% endif %}
             
             # Backward
