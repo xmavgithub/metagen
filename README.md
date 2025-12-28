@@ -141,6 +141,18 @@ MetaGen synthesizes architectures for **5 modalities** with specialized handlers
 | **Video** | 3D-CNN, Temporal Transformer | `video/video_generation.yaml` |
 | **Multi-modal** | CLIP-style, Cross-attention fusion | `multimodal/multimodal_clip.yaml` |
 
+### Task-Based Handlers
+
+MetaGen supports task-specific heads and losses beyond generation:
+
+| Task Area | Example Spec | Notes |
+|-----------|--------------|-------|
+| Classification/Regression | `text/text_classifier_bert.yaml`, `tabular/tabular_regressor.yaml` | Label and regression outputs |
+| Detection/Segmentation | `image/object_detector_yolo.yaml`, `image/semantic_segmentation_unet.yaml` | Bounding boxes, masks |
+| Time Series | `time_series/time_series_forecaster.yaml` | Forecasting and anomaly detection |
+| Reinforcement Learning | `rl/rl_agent_ppo.yaml` | Policy/value heads |
+| Graph | `graph/graph_classifier_gat.yaml` | GNN tasks |
+
 ### AutoML Architecture Search
 
 Find optimal architectures automatically:
@@ -264,6 +276,8 @@ architecture:
 <details>
 <summary><b>All example specs</b></summary>
 
+Full index: `docs/reference/specs.md`
+
 | Spec | Description | Modality | Params |
 |------|-------------|----------|--------|
 | `text/text_llm_8b.yaml` | Large language model | text→text | 8B |
@@ -275,6 +289,11 @@ architecture:
 | `multimodal/multimodal_clip.yaml` | CLIP-style model | text+image→both | 800M |
 | `text/edge_tiny_agent.yaml` | Edge deployment | text→text | 50M |
 | `3d/3d_text_to_mesh.yaml` | 3D mesh generation | text→3d | 1B |
+| `image/object_detector_yolo.yaml` | Object detection | image→bounding_boxes | N/A |
+| `image/semantic_segmentation_unet.yaml` | Semantic segmentation | image→segmentation_mask | N/A |
+| `time_series/time_series_forecaster.yaml` | Time series forecast | time_series→time_series | N/A |
+| `rl/rl_agent_ppo.yaml` | RL policy | obs→action | N/A |
+| `graph/graph_classifier_gat.yaml` | Graph classification | graph→label | N/A |
 
 </details>
 
@@ -309,6 +328,8 @@ metagen schema          # Print JSON schema for specs
 | Document | Description |
 |----------|-------------|
 | [Spec Language Reference](docs/user-guide/spec_language.md) | Complete MSL schema |
+| [Example Specs Index](docs/reference/specs.md) | Curated example specs |
+| [CLI Reference](docs/reference/cli.md) | Full CLI reference |
 | [CLAUDE.md](CLAUDE.md) | Development guide and architecture |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |

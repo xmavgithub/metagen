@@ -173,9 +173,14 @@ See `examples/specs/` for reference specifications:
 - `audio/audio_musicgen_like.yaml` - Audio generation
 - `video/video_realtime_avatar.yaml` - Video generation
 - `3d/3d_text_to_mesh.yaml` - 3D mesh generation
+- `time_series/time_series_forecaster.yaml` - Time series forecasting
+- `graph/graph_classifier_gat.yaml` - Graph classification
+- `rl/rl_agent_ppo.yaml` - RL policy gradient
 - `text/edge_tiny_agent.yaml` - Edge deployment constraints
 - `text/infinite_context.yaml` - Triggers warning for infinite context
 - `misc/taste_generation.yaml` - Triggers warning for unsupported modality
+
+Full index: `docs/reference/specs.md`
 
 ## Testing Philosophy
 

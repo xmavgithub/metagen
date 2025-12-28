@@ -15,7 +15,12 @@ MetaGen includes several example specifications:
 ls examples/specs/
 ```
 
-You'll see specs for different modalities and architectures.
+You'll see folders for different domains (text, image, audio, time_series, graph, rl).
+Browse `docs/reference/specs.md` for a full index, or drill into a folder:
+
+```bash
+ls examples/specs/text/
+```
 
 ## Step 2: Examine a Spec
 

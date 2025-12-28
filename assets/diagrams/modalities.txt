@@ -72,6 +72,21 @@ Example Specs by Modality
 │  3D                                                                          │
 │  ──                                                                          │
 │  3d/3d_text_to_mesh.yaml │ Text-to-3D mesh generation                        │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  TIME SERIES                                                                 │
+│  ───────────                                                                 │
+│  time_series/time_series_forecaster.yaml      │ Forecasting model            │
+│  time_series/anomaly_detector_autoencoder.yaml │ Anomaly detection           │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  GRAPH                                                                       │
+│  ─────                                                                       │
+│  graph/graph_classifier_gat.yaml  │ Graph classification                     │
+│  graph/recommender_two_tower.yaml │ Two-tower recommendation                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  REINFORCEMENT LEARNING                                                      │
+│  ─────────────────────                                                      │
+│  rl/rl_agent_ppo.yaml │ PPO policy gradient                                  │
+│  rl/rl_agent_dqn.yaml │ DQN value-based                                       │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -87,4 +102,6 @@ Modality → Objective Mapping
 │ audio → audio     │ autoregressive                                         │
 │ text → video      │ diffusion                                              │
 │ text+image → both │ contrastive                                            │
+│ time_series → ts  │ time_series_forecast, anomaly_detection                │
+│ graph → label     │ node_classification, graph_classification              │
 └───────────────────┴────────────────────────────────────────────────────────┘

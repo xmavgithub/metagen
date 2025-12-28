@@ -64,6 +64,9 @@ Generate a complete release package:
 metagen synth examples/specs/text/text_llm_8b.yaml --out outputs/
 ```
 
+Example specs are organized by domain under `examples/specs/`. See
+`docs/reference/specs.md` for the full index and paths.
+
 ### 3. Explore the Output
 
 ```bash
@@ -185,3 +188,4 @@ python --version
 - [AutoML Guide](automl_guide.md) - Architecture search
 - [Multi-Modal Guide](multi_modal.md) - Working with different modalities
 - [CLI Reference](../reference/cli.md) - All commands and options
+- [Example Specs Index](../reference/specs.md) - Curated spec list

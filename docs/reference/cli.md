@@ -10,6 +10,16 @@ metagen [OPTIONS] COMMAND [ARGS]
 
 ## Commands
 
+## Spec Paths and Examples
+
+Bundled specs are organized under `examples/specs/<domain>/`. Browse the full list in
+`docs/reference/specs.md` or start with a common spec:
+
+```bash
+metagen synth examples/specs/text/text_llm_8b.yaml --out outputs/
+metagen synth examples/specs/image/object_detector_yolo.yaml --out outputs/
+```
+
 ### synth
 
 Synthesize a complete release package from a specification.
@@ -34,6 +44,9 @@ metagen synth [OPTIONS] SPEC_PATH
 ```bash
 # Basic synthesis
 metagen synth examples/specs/text/text_llm_8b.yaml
+
+# Detection spec
+metagen synth examples/specs/image/object_detector_yolo.yaml --out outputs/
 
 # Custom output directory
 metagen synth my_spec.yaml --out my_outputs/
@@ -85,6 +98,9 @@ metagen paper [OPTIONS] SPEC_PATH
 ```bash
 # Generate paper
 metagen paper examples/specs/text/text_llm_8b.yaml --out paper/
+
+# Time series spec
+metagen paper examples/specs/time_series/time_series_forecaster.yaml --out paper/
 
 # Build PDF (requires LaTeX)
 cd paper && make pdf
@@ -279,3 +295,4 @@ metagen synth updated_spec.yaml
 - [Quick Start Guide](../user-guide/quickstart.md)
 - [Spec Language Reference](../user-guide/spec_language.md)
 - [AutoML Guide](../user-guide/automl_guide.md)
+- [Example Specs Index](specs.md)

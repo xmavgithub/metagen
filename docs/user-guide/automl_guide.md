@@ -238,3 +238,4 @@ for candidate in results.top_k(3):
 - [Quick Start Guide](quickstart.md) - Getting started
 - [Spec Language Reference](spec_language.md) - Spec configuration
 - [Multi-Modal Guide](multi_modal.md) - Different modalities
+- [Example Specs Index](../reference/specs.md) - Curated spec list

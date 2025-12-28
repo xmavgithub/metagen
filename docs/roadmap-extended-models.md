@@ -443,7 +443,7 @@ src/metagen/
 
 ---
 
-## Example Specs (to be added to examples/specs/)
+## Example Specs (examples/specs/)
 
 ### Classification
 - `image/image_classifier_resnet.yaml` - ResNet-50 ImageNet classifier
@@ -495,7 +495,6 @@ src/metagen/
 - [x] Add example specs
 - [x] Add tests
 
-### Phase 4: Time Series (1-2 days)
 ### Phase 4: Time Series (1-2 days) ✅ COMPLETED
 - [x] Implement TimeSeriesTaskHandler
 - [x] Add temporal model templates
@@ -516,11 +515,11 @@ src/metagen/
 - [x] Add example specs
 - [x] Add tests
 
-### Phase 7: Documentation Refresh (1 day)
-- [ ] Update README with extended task coverage
-- [ ] Update docs guides/tutorials with new example specs
-- [ ] Update CLI/reference docs with new spec paths
-- [ ] Add consolidated spec index page
+### Phase 7: Documentation Refresh (1 day) ✅ COMPLETED
+- [x] Update README with extended task coverage
+- [x] Update docs guides/tutorials with new example specs
+- [x] Update CLI/reference docs with new spec paths
+- [x] Add consolidated spec index page
 
 ---
 

@@ -1,8 +1,22 @@
 site_name: MetaGen
 theme: readthedocs
 nav:
-  - Spec Language: docs/spec_language.md
-  - Architecture: docs/architecture.md
-  - Benchmarks: docs/benchmarks.md
-  - Paper: docs/paper.md
-  - FAQ: docs/faq.md
+  - Home: README.md
+  - User Guide:
+      - Quick Start: user-guide/quickstart.md
+      - Spec Language: user-guide/spec_language.md
+      - AutoML Guide: user-guide/automl_guide.md
+      - Multi-Modal Guide: user-guide/multi_modal.md
+      - Paper: user-guide/paper.md
+      - Benchmarks: user-guide/benchmarks.md
+      - FAQ: user-guide/faq.md
+  - Tutorials:
+      - First Synthesis: tutorials/01_first_synthesis.md
+      - Custom Specs: tutorials/02_custom_spec.md
+      - Architecture Search: tutorials/03_architecture_search.md
+  - Reference:
+      - CLI: reference/cli.md
+      - Architecture: reference/architecture.md
+      - Specs Index: reference/specs.md
+  - Roadmaps:
+      - Extended Models: roadmap-extended-models.md
