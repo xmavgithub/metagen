@@ -1,0 +1,31 @@
+# Link prediction head fragment.
+import torch
+import torch.nn as nn
+
+
+class LinkPredictionHead(nn.Module):
+    """Link prediction head producing edge scores."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        output_dim: int = {{ blueprint.num_outputs or 1 }},
+    ) -> None:
+        super().__init__()
+        self.output_dim = output_dim
+        self.proj = nn.Linear(hidden_dim, hidden_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Node embeddings of shape (batch_size, num_nodes, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            Edge logits of shape (batch_size, num_nodes, num_nodes).
+        """
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
+        x = self.proj(x)
+        scores = torch.matmul(x, x.transpose(-1, -2))
+        return scores

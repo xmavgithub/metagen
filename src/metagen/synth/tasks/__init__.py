@@ -66,6 +66,12 @@ from metagen.synth.tasks.base import TaskComponents, TaskHandler
 from metagen.synth.tasks.classification import ClassificationTaskHandler
 from metagen.synth.tasks.detection import DetectionTaskHandler
 from metagen.synth.tasks.embedding import EmbeddingTaskHandler
+from metagen.synth.tasks.graph import (
+    GraphClassificationTaskHandler,
+    LinkPredictionTaskHandler,
+    NodeClassificationTaskHandler,
+    RecommendationTaskHandler,
+)
 from metagen.synth.tasks.ranking import RankingTaskHandler
 from metagen.synth.tasks.registry import (
     clear_task_handler_cache,
@@ -121,4 +127,9 @@ __all__ = [
     "ValueBasedTaskHandler",
     "ActorCriticTaskHandler",
     "ModelBasedTaskHandler",
+    # Phase 6 handlers
+    "NodeClassificationTaskHandler",
+    "LinkPredictionTaskHandler",
+    "GraphClassificationTaskHandler",
+    "RecommendationTaskHandler",
 ]

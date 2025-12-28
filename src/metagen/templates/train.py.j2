@@ -62,6 +62,8 @@ def train(
     criterion = nn.CrossEntropyLoss()
     {% elif task_components.loss_type == "cross_entropy_with_label_smoothing" %}
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    {% elif task_components.loss_type == "bce_with_logits" %}
+    criterion = nn.BCEWithLogitsLoss()
     {% elif task_components.loss_type == "mse" %}
     criterion = nn.MSELoss()
     {% else %}

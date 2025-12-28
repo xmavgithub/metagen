@@ -28,11 +28,15 @@ from metagen.synth.tasks import (
     ClassificationTaskHandler,
     DetectionTaskHandler,
     EmbeddingTaskHandler,
+    GraphClassificationTaskHandler,
     InstanceSegmentationTaskHandler,
+    LinkPredictionTaskHandler,
     ModelBasedTaskHandler,
+    NodeClassificationTaskHandler,
     PanopticSegmentationTaskHandler,
     PolicyGradientTaskHandler,
     RankingTaskHandler,
+    RecommendationTaskHandler,
     RegressionTaskHandler,
     SemanticSegmentationTaskHandler,
     TimeSeriesForecastTaskHandler,
@@ -145,6 +149,14 @@ class TestHandlerRegistration:
         assert "value_based" in task_types
         assert "actor_critic" in task_types
         assert "model_based" in task_types
+
+    def test_graph_registered(self) -> None:
+        """Test that graph handlers are registered."""
+        task_types = list_registered_task_types()
+        assert "node_classification" in task_types
+        assert "link_prediction" in task_types
+        assert "graph_classification" in task_types
+        assert "recommendation" in task_types
 
 
 class TestClassificationTaskHandler:
@@ -822,6 +834,73 @@ class TestReinforcementTaskHandlers:
         handler = get_task_handler(spec)
 
         assert isinstance(handler, PolicyGradientTaskHandler)
+
+
+class TestGraphTaskHandlers:
+    """Tests for graph task handlers."""
+
+    def test_node_classification_head(self) -> None:
+        """Test node classification head architecture."""
+        handler = NodeClassificationTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["graph"], outputs=["label"]),
+            task=MockTask(type="node_classification", num_classes=3, node_features=64),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "node_classification_head"
+        assert head["num_classes"] == 3
+
+    def test_graph_classification_head(self) -> None:
+        """Test graph classification head architecture."""
+        handler = GraphClassificationTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["graph"], outputs=["label"]),
+            task=MockTask(type="graph_classification", num_classes=2),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "graph_classification_head"
+        assert head["num_classes"] == 2
+
+    def test_link_prediction_loss(self) -> None:
+        """Test link prediction loss type."""
+        handler = LinkPredictionTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["graph"], outputs=["graph"]),
+            task=MockTask(type="link_prediction"),
+        )
+
+        loss = handler.get_loss_function(spec)
+
+        assert loss == "bce_with_logits"
+
+    def test_recommendation_loss(self) -> None:
+        """Test recommendation loss type."""
+        handler = RecommendationTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["graph"], outputs=["regression"]),
+            task=MockTask(type="recommendation"),
+        )
+
+        loss = handler.get_loss_function(spec)
+
+        assert loss == "mse"
+
+    def test_get_task_handler_returns_node_classification(self) -> None:
+        """Test get_task_handler returns graph handler."""
+        spec = MockSpec(
+            modality=MockModality(inputs=["graph"], outputs=["label"]),
+            task=MockTask(type="node_classification"),
+        )
+
+        handler = get_task_handler(spec)
+
+        assert isinstance(handler, NodeClassificationTaskHandler)
 
 
 class TestGenerateComponents:

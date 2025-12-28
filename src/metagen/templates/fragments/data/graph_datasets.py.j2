@@ -1,0 +1,42 @@
+# Graph dataset fragment (synthetic by default).
+try:
+    import torch
+    from torch.utils.data import DataLoader, Dataset
+except ImportError:  # pragma: no cover
+    torch = None
+    Dataset = object
+    DataLoader = object
+
+
+class SyntheticGraphDataset(Dataset):
+    """Generates random graphs with node features and labels."""
+
+    def __init__(
+        self,
+        size: int = 1000,
+        num_nodes: int = 32,
+        node_features: int = {{ blueprint.node_features or 128 }},
+        num_classes: int = {{ blueprint.num_classes or 2 }},
+    ) -> None:
+        self.size = size
+        self.num_nodes = num_nodes
+        self.node_features = node_features
+        self.num_classes = num_classes
+
+    def __len__(self) -> int:
+        return self.size
+
+    def __getitem__(self, idx: int):
+        if not torch:
+            return []
+        x = torch.randn(self.num_nodes, self.node_features)
+        y = torch.randint(0, self.num_classes, (self.num_nodes,))
+        return x, y
+
+
+def build_graph_dataloader(
+    batch_size: int = 8,
+    shuffle: bool = True,
+) -> DataLoader:
+    dataset = SyntheticGraphDataset()
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)

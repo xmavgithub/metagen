@@ -1,0 +1,49 @@
+# MetaGen Spec: Two-Tower Recommender
+#
+# User-item matching model for recommendation.
+#
+# Example Usage:
+#   metagen synth examples/specs/graph/recommender_two_tower.yaml --out outputs/recommender/
+
+metagen_version: "1.0"
+name: "Two-Tower Recommender"
+
+modality:
+  inputs:
+    - graph
+  outputs:
+    - regression
+
+task:
+  type: recommendation
+  domain: commerce
+  num_outputs: 1
+  node_features: 128
+  edge_features: 32
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "10M"
+
+architecture:
+  family: transformer
+
+training:
+  objective:
+    - ranking
+  data:
+    sources:
+      - clicks
+    size: "20M interactions"
+  compute:
+    hardware: "2xA100"
+    duration: "10 hours"
+
+evaluation:
+  benchmarks:
+    - ndcg_at_10
+  metrics:
+    - rmse
+    - ndcg_at_10

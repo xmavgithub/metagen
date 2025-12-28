@@ -467,8 +467,8 @@ src/metagen/
 - `rl/rl_agent_dqn.yaml` - DQN for Atari games
 
 ### Graph
-- `graph_classifier_gat.yaml` - Graph Attention Network
-- `recommender_two_tower.yaml` - Two-tower recommendation
+- `graph/graph_classifier_gat.yaml` - Graph Attention Network
+- `graph/recommender_two_tower.yaml` - Two-tower recommendation
 
 ---
 
@@ -509,12 +509,12 @@ src/metagen/
 - [x] Add example specs
 - [x] Add tests
 
-### Phase 6: Graph Neural Networks (2-3 days)
-- [ ] Implement GraphTaskHandler
-- [ ] Add GNN architecture templates
-- [ ] Add graph data loaders
-- [ ] Add example specs
-- [ ] Add tests
+### Phase 6: Graph Neural Networks (2-3 days) ✅ COMPLETED
+- [x] Implement GraphTaskHandler
+- [x] Add GNN architecture templates
+- [x] Add graph data loaders
+- [x] Add example specs
+- [x] Add tests
 
 ### Phase 7: Documentation Refresh (1 day)
 - [ ] Update README with extended task coverage
