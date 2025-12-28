@@ -320,6 +320,7 @@ class TaskHandler(ABC):
             head_type=head.get("type", f"{self.name}_head"),
             loss_type=self.get_loss_function(spec),
             metrics=tuple(self.get_metrics(spec)),
+            template_fragments=tuple(self.get_template_fragments(spec, blueprint)),
             config=head,
         )
 

@@ -56,7 +56,19 @@ def train(
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     
     # Loss function
-    {% if blueprint.vocab_size %}
+    {% if task_components and task_components.loss_type %}
+    # Task-specific loss
+    {% if task_components.loss_type == "cross_entropy" %}
+    criterion = nn.CrossEntropyLoss()
+    {% elif task_components.loss_type == "cross_entropy_with_label_smoothing" %}
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    {% elif task_components.loss_type == "mse" %}
+    criterion = nn.MSELoss()
+    {% else %}
+    # Default fallback for unknown task loss
+    criterion = nn.MSELoss()
+    {% endif %}
+    {% elif blueprint.vocab_size %}
     criterion = nn.CrossEntropyLoss()
     {% else %}
     criterion = nn.MSELoss()
@@ -103,7 +115,13 @@ def train(
             elif hasattr(output, 'loss'):
                 loss = output.loss
             else:
-                {% if blueprint.vocab_size %}
+                {% if task_components and task_components.loss_type %}
+                # Task-specific loss calculation
+                if y is not None:
+                     loss = criterion(output, y)
+                else:
+                     raise ValueError(f"Task {{ task_components.head_type }} requires targets (y).")
+                {% elif blueprint.vocab_size %}
                 # Reshape for CrossEntropy: [B*T, V], [B*T]
                 if y is not None:
                     loss = criterion(output.view(-1, output.size(-1)), y.view(-1))

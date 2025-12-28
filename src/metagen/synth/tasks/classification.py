@@ -169,13 +169,13 @@ class ClassificationTaskHandler(TaskHandler):
         # Add modality-specific data loader template
         primary_input = spec.modality.inputs[0].lower()
         if primary_input == "image":
-            fragments.append("data/image_classification_dataset.py.j2")
+            fragments.append("data/image_datasets.py.j2")
         elif primary_input == "text":
-            fragments.append("data/text_classification_dataset.py.j2")
+            fragments.append("data/text_datasets.py.j2")
         elif primary_input == "audio":
-            fragments.append("data/audio_classification_dataset.py.j2")
+            fragments.append("data/audio_datasets.py.j2")
 
         # Add loss template
-        fragments.append("losses/cross_entropy_loss.py.j2")
+        fragments.append("losses/cross_entropy.py.j2")
 
         return fragments

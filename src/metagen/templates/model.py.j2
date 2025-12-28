@@ -3,6 +3,12 @@
 try:
     import torch
     import torch.nn as nn
+    {% if task_components and task_components.template_fragments %}
+    # Task-specific components
+    {% for fragment in task_components.template_fragments %}
+    {% include "fragments/" + fragment %}
+    {% endfor %}
+    {% endif %}
 except Exception:  # pragma: no cover
     torch = None
     nn = object
@@ -52,6 +58,16 @@ class MetaGenModel(nn.Module if torch else object):
             {% if blueprint.vocab_size %}
             self.output_head = nn.Linear(hidden_size, {{ blueprint.vocab_size }}, bias=False)
             {% endif %}
+            
+            {% if task_components and task_components.head_type %}
+            # Task-specific output head
+            {% if task_components.head_type == "classification_head" %}
+            self.output_head = ClassificationHead(
+                hidden_dim=hidden_size,
+                num_classes={{ blueprint.num_classes or 1000 }},
+            )
+            {% endif %}
+            {% endif %}
         else:
             self.layers = []
             self.norm = None
@@ -68,7 +84,7 @@ class MetaGenModel(nn.Module if torch else object):
         for layer in self.layers:
             x = layer(x)
         x = self.norm(x)
-        {% if blueprint.vocab_size %}
+        {% if blueprint.vocab_size or (task_components and task_components.head_type) %}
         x = self.output_head(x)
         {% endif %}
         return x
