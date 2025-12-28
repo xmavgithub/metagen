@@ -1,0 +1,21 @@
+# Reinforcement learning loss fragments.
+import torch
+import torch.nn.functional as F
+
+
+def policy_gradient_loss(logits: torch.Tensor, actions: torch.Tensor, advantages: torch.Tensor) -> torch.Tensor:
+    log_probs = F.log_softmax(logits, dim=-1)
+    selected = log_probs.gather(-1, actions.unsqueeze(-1)).squeeze(-1)
+    return -(selected * advantages).mean()
+
+
+def td_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    return F.mse_loss(pred, target)
+
+
+def actor_critic_loss(policy_loss: torch.Tensor, value_loss: torch.Tensor, entropy: torch.Tensor) -> torch.Tensor:
+    return policy_loss + 0.5 * value_loss - 0.01 * entropy
+
+
+def model_based_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    return F.mse_loss(pred, target)

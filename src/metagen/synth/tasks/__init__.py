@@ -76,6 +76,12 @@ from metagen.synth.tasks.registry import (
     register_task,
 )
 from metagen.synth.tasks.regression import RegressionTaskHandler
+from metagen.synth.tasks.reinforcement import (
+    ActorCriticTaskHandler,
+    ModelBasedTaskHandler,
+    PolicyGradientTaskHandler,
+    ValueBasedTaskHandler,
+)
 from metagen.synth.tasks.segmentation import (
     InstanceSegmentationTaskHandler,
     PanopticSegmentationTaskHandler,
@@ -110,4 +116,9 @@ __all__ = [
     # Phase 4 handlers
     "TimeSeriesForecastTaskHandler",
     "AnomalyDetectionTaskHandler",
+    # Phase 5 handlers
+    "PolicyGradientTaskHandler",
+    "ValueBasedTaskHandler",
+    "ActorCriticTaskHandler",
+    "ModelBasedTaskHandler",
 ]

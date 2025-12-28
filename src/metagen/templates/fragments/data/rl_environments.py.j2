@@ -1,0 +1,11 @@
+# RL environment helpers (minimal stub).
+try:
+    import gymnasium as gym
+except Exception:  # pragma: no cover
+    gym = None
+
+
+def make_env(env_id: str = "CartPole-v1"):
+    if gym is None:
+        raise RuntimeError("gymnasium not installed")
+    return gym.make(env_id)

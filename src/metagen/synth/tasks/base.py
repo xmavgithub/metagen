@@ -79,6 +79,13 @@ class TaskComponents:
             - "embedding_head": Vector embedding output
             - "rl_policy_head": RL policy network head
             - "rl_value_head": RL value network head
+            - "rl_actor_critic_head": Combined policy + value head
+            - "rl_model_head": Model-based RL head
+            - "time_series_head": Temporal forecasting head
+            - "graph_classification_head": Graph-level classifier
+            - "node_classification_head": Node-level classifier
+            - "link_prediction_head": Edge/link predictor
+            - "recommendation_head": Recommendation score head
         loss_type: Loss function to use for training.
             Examples: "cross_entropy", "mse", "focal", "detection_loss"
         metrics: Evaluation metrics for this task.

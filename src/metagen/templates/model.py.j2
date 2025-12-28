@@ -106,6 +106,38 @@ class MetaGenModel(nn.Module if torch else object):
                 output_dim={{ head_config.get("output_dim", blueprint.num_outputs or 1) }},
                 dropout={{ head_config.get("dropout", 0.1) }},
             )
+            {% elif task_components.head_type == "rl_policy_head" %}
+            self.output_head = RLPolicyHead(
+                hidden_dim=hidden_size,
+                action_space="{{ head_config.get('action_space', blueprint.action_space or 'discrete') }}",
+                num_actions={{ head_config.get("num_actions", blueprint.num_actions or 0) }},
+                action_dim={{ head_config.get("action_dim", blueprint.action_dim or 0) }},
+                dropout={{ head_config.get("dropout", 0.1) }},
+            )
+            {% elif task_components.head_type == "rl_value_head" %}
+            self.output_head = RLValueHead(
+                hidden_dim=hidden_size,
+                action_space="{{ head_config.get('action_space', blueprint.action_space or 'discrete') }}",
+                num_actions={{ head_config.get("num_actions", blueprint.num_actions or 0) }},
+                action_dim={{ head_config.get("action_dim", blueprint.action_dim or 0) }},
+                dropout={{ head_config.get("dropout", 0.1) }},
+            )
+            {% elif task_components.head_type == "rl_actor_critic_head" %}
+            self.output_head = RLActorCriticHead(
+                hidden_dim=hidden_size,
+                action_space="{{ head_config.get('action_space', blueprint.action_space or 'discrete') }}",
+                num_actions={{ head_config.get("num_actions", blueprint.num_actions or 0) }},
+                action_dim={{ head_config.get("action_dim", blueprint.action_dim or 0) }},
+                dropout={{ head_config.get("dropout", 0.1) }},
+            )
+            {% elif task_components.head_type == "rl_model_head" %}
+            self.output_head = RLModelHead(
+                hidden_dim=hidden_size,
+                action_space="{{ head_config.get('action_space', blueprint.action_space or 'discrete') }}",
+                num_actions={{ head_config.get("num_actions", blueprint.num_actions or 0) }},
+                action_dim={{ head_config.get("action_dim", blueprint.action_dim or 0) }},
+                dropout={{ head_config.get("dropout", 0.1) }},
+            )
             {% else %}
             output_dim = {{ head_config.get("num_outputs", head_config.get("num_classes", 1)) }}
             self.output_head = nn.Linear(hidden_size, output_dim)

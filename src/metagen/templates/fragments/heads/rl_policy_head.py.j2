@@ -1,0 +1,45 @@
+# RL policy head fragment.
+import torch
+import torch.nn as nn
+
+
+class RLPolicyHead(nn.Module):
+    """Policy head for RL action selection."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        action_space: str = "{{ blueprint.action_space or 'discrete' }}",
+        num_actions: int | None = {{ blueprint.num_actions or 0 }},
+        action_dim: int | None = {{ blueprint.action_dim or 0 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.action_space = action_space
+        self.dropout = nn.Dropout(dropout)
+
+        if action_space == "continuous":
+            dim = action_dim or 1
+            self.policy = nn.Linear(hidden_dim, dim)
+            self.log_std = nn.Parameter(torch.zeros(dim))
+        else:
+            dim = num_actions or 1
+            self.policy = nn.Linear(hidden_dim, dim)
+
+    def forward(self, x: torch.Tensor):
+        """
+        Args:
+            x: Hidden states of shape (batch_size, seq_len, hidden_dim)
+               or (batch_size, hidden_dim).
+
+        Returns:
+            For discrete: logits (batch_size, num_actions)
+            For continuous: (mean, log_std)
+        """
+        if x.dim() == 3:
+            x = x[:, -1]
+        x = self.dropout(x)
+        logits_or_mean = self.policy(x)
+        if self.action_space == "continuous":
+            return logits_or_mean, self.log_std.expand_as(logits_or_mean)
+        return logits_or_mean

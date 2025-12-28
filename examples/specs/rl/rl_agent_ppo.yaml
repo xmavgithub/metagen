@@ -1,0 +1,49 @@
+# MetaGen Spec: PPO RL Agent
+#
+# Policy gradient agent for continuous control.
+#
+# Example Usage:
+#   metagen synth examples/specs/rl/rl_agent_ppo.yaml --out outputs/ppo/
+
+metagen_version: "1.0"
+name: "PPO Continuous Control Agent"
+
+modality:
+  inputs:
+    - tabular
+  outputs:
+    - action
+
+task:
+  type: policy_gradient
+  domain: robotics
+  action_space: continuous
+  action_dim: 6
+
+constraints:
+  device: consumer_gpu
+  latency: batch
+  parameter_budget:
+    max: "5M"
+
+architecture:
+  family: mlp
+
+training:
+  objective:
+    - policy_gradient
+  data:
+    sources:
+      - simulated
+    size: "10M transitions"
+  compute:
+    hardware: "2xA100"
+    duration: "12 hours"
+
+evaluation:
+  benchmarks:
+    - episode_return
+    - sample_efficiency
+  metrics:
+    - episode_return
+    - entropy

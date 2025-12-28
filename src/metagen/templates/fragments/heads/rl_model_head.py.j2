@@ -1,0 +1,39 @@
+# RL model-based head fragment.
+import torch
+import torch.nn as nn
+
+
+class RLModelHead(nn.Module):
+    """Model-based head predicting actions and next-state embeddings."""
+
+    def __init__(
+        self,
+        hidden_dim: int = {{ blueprint.dims.hidden_size }},
+        action_space: str = "{{ blueprint.action_space or 'discrete' }}",
+        num_actions: int | None = {{ blueprint.num_actions or 0 }},
+        action_dim: int | None = {{ blueprint.action_dim or 0 }},
+        dropout: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.action_space = action_space
+        self.dropout = nn.Dropout(dropout)
+
+        if action_space == "continuous":
+            action_out_dim = action_dim or 1
+        else:
+            action_out_dim = num_actions or 1
+
+        self.policy = nn.Linear(hidden_dim, action_out_dim)
+        self.dynamics = nn.Linear(hidden_dim, hidden_dim)
+
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
+        """
+        Returns:
+            Dict with policy outputs and next-state prediction.
+        """
+        if x.dim() == 3:
+            x = x[:, -1]
+        x = self.dropout(x)
+        action_out = self.policy(x)
+        next_state = self.dynamics(x)
+        return {"action": action_out, "next_state": next_state}

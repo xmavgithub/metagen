@@ -463,8 +463,8 @@ src/metagen/
 - `time_series/anomaly_detector_autoencoder.yaml` - Variational autoencoder
 
 ### Reinforcement Learning
-- `rl_agent_ppo.yaml` - PPO for continuous control
-- `rl_agent_dqn.yaml` - DQN for Atari games
+- `rl/rl_agent_ppo.yaml` - PPO for continuous control
+- `rl/rl_agent_dqn.yaml` - DQN for Atari games
 
 ### Graph
 - `graph_classifier_gat.yaml` - Graph Attention Network
@@ -502,12 +502,12 @@ src/metagen/
 - [x] Add example specs
 - [x] Add tests
 
-### Phase 5: Reinforcement Learning (2-3 days)
-- [ ] Implement RLTaskHandler
-- [ ] Add RL-specific templates (policy, value heads)
-- [ ] Add environment wrappers
-- [ ] Add example specs
-- [ ] Add tests
+### Phase 5: Reinforcement Learning (2-3 days) ✅ COMPLETED
+- [x] Implement RLTaskHandler
+- [x] Add RL-specific templates (policy, value heads)
+- [x] Add environment wrappers
+- [x] Add example specs
+- [x] Add tests
 
 ### Phase 6: Graph Neural Networks (2-3 days)
 - [ ] Implement GraphTaskHandler
@@ -515,6 +515,12 @@ src/metagen/
 - [ ] Add graph data loaders
 - [ ] Add example specs
 - [ ] Add tests
+
+### Phase 7: Documentation Refresh (1 day)
+- [ ] Update README with extended task coverage
+- [ ] Update docs guides/tutorials with new example specs
+- [ ] Update CLI/reference docs with new spec paths
+- [ ] Add consolidated spec index page
 
 ---
 

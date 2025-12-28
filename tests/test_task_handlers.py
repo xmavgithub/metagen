@@ -23,16 +23,20 @@ import pytest
 
 from metagen.synth.architecture import BlueprintState
 from metagen.synth.tasks import (
+    ActorCriticTaskHandler,
     AnomalyDetectionTaskHandler,
     ClassificationTaskHandler,
     DetectionTaskHandler,
     EmbeddingTaskHandler,
     InstanceSegmentationTaskHandler,
+    ModelBasedTaskHandler,
     PanopticSegmentationTaskHandler,
+    PolicyGradientTaskHandler,
     RankingTaskHandler,
     RegressionTaskHandler,
     SemanticSegmentationTaskHandler,
     TimeSeriesForecastTaskHandler,
+    ValueBasedTaskHandler,
     get_task_handler,
     list_registered_task_types,
 )
@@ -133,6 +137,14 @@ class TestHandlerRegistration:
         task_types = list_registered_task_types()
         assert "time_series_forecast" in task_types
         assert "anomaly_detection" in task_types
+
+    def test_reinforcement_registered(self) -> None:
+        """Test that RL handlers are registered."""
+        task_types = list_registered_task_types()
+        assert "policy_gradient" in task_types
+        assert "value_based" in task_types
+        assert "actor_critic" in task_types
+        assert "model_based" in task_types
 
 
 class TestClassificationTaskHandler:
@@ -716,6 +728,100 @@ class TestTimeSeriesTaskHandlers:
         handler = get_task_handler(spec)
 
         assert isinstance(handler, TimeSeriesForecastTaskHandler)
+
+
+class TestReinforcementTaskHandlers:
+    """Tests for reinforcement learning task handlers."""
+
+    def test_policy_gradient_name(self) -> None:
+        """Test policy gradient handler name."""
+        handler = PolicyGradientTaskHandler()
+        assert handler.name == "policy_gradient"
+
+    def test_supported_modalities(self) -> None:
+        """Test supported modalities for RL."""
+        handler = PolicyGradientTaskHandler()
+        assert "image" in handler.supported_modalities
+        assert "tabular" in handler.supported_modalities
+
+    def test_augment_blueprint_defaults(self) -> None:
+        """Test RL defaults for discrete action space."""
+        handler = PolicyGradientTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["action"]),
+            task=MockTask(type="policy_gradient", domain="game", action_space=None),
+        )
+        blueprint = make_blueprint()
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.action_space == "discrete"
+        assert augmented.num_actions == 10
+
+    def test_continuous_action_space(self) -> None:
+        """Test RL continuous action defaults."""
+        handler = PolicyGradientTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["tabular"], outputs=["action"]),
+            task=MockTask(type="policy_gradient", action_space="continuous", action_dim=None),
+        )
+        blueprint = make_blueprint()
+
+        augmented = handler.augment_blueprint(spec, blueprint, seed=42)
+
+        assert augmented.action_space == "continuous"
+        assert augmented.action_dim == 4
+
+    def test_value_based_head(self) -> None:
+        """Test value-based head architecture."""
+        handler = ValueBasedTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["action"]),
+            task=MockTask(type="value_based", action_space="discrete", num_actions=6),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "rl_value_head"
+        assert head["num_actions"] == 6
+
+    def test_actor_critic_head(self) -> None:
+        """Test actor-critic head architecture."""
+        handler = ActorCriticTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["action"]),
+            task=MockTask(type="actor_critic", action_space="discrete", num_actions=4),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "rl_actor_critic_head"
+
+    def test_model_based_head(self) -> None:
+        """Test model-based head architecture."""
+        handler = ModelBasedTaskHandler()
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["action"]),
+            task=MockTask(type="model_based", action_space="discrete", num_actions=8),
+        )
+        blueprint = make_blueprint()
+
+        head = handler.get_head_architecture(spec, blueprint)
+
+        assert head["type"] == "rl_model_head"
+
+    def test_get_task_handler_returns_policy_gradient(self) -> None:
+        """Test get_task_handler returns RL handler."""
+        spec = MockSpec(
+            modality=MockModality(inputs=["image"], outputs=["action"]),
+            task=MockTask(type="policy_gradient"),
+        )
+
+        handler = get_task_handler(spec)
+
+        assert isinstance(handler, PolicyGradientTaskHandler)
 
 
 class TestGenerateComponents:
